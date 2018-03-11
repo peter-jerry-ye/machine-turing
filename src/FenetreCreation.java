@@ -1,20 +1,22 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 
 public class FenetreCreation extends JFrame implements ActionListener, FocusListener{
 	
 	private static final long serialVersionUID = 1L;
 
 	JPanel mainPanel;
-	JTextField text1, text2;
+	JTextField text1, text2, textBrowse;
 	JList<String> states, symbols;
 	JScrollPane scrollStates, scrollSymbols;
-	JButton ok, cancel, add1, add2, del1, del2;
-	JLabel label1, label2;
-	DefaultListModel<String> listModel1, listModel2;	
-	
-	
+	JButton ok, cancel, add1, add2, del1, del2, browse;
+	JLabel label1, label2, labelData;
+	JFileChooser fc;
+	FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files","txt");
+	DefaultListModel<String> listModel1, listModel2;
 	
 	public FenetreCreation(){
 		super("Machine de Turing - Creation");
@@ -73,9 +75,23 @@ public class FenetreCreation extends JFrame implements ActionListener, FocusList
 		del2.setBounds(215,285,55,25);
 		del2.addActionListener(this);
 		
+		labelData = new JLabel("Data :");
+		labelData.setBounds(15, 325, 200, 25);		
+		
+		textBrowse = new JTextField();
+		textBrowse.setBounds(15, 350, 155, 25);
+		
+		browse = new JButton("Browse...");
+		browse.setBounds(180, 350, 90, 25);
+		browse.addActionListener(this);
+		
+		fc = new JFileChooser();
+		fc.setFileFilter(filter);
+		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(null);
 		mainPanel.setBounds(0, 0, 500, 400);
+		//mainPanel.setBackground(Color.BLACK);
 		mainPanel.add(scrollStates);
 		mainPanel.add(scrollSymbols);
 		mainPanel.add(ok);
@@ -88,6 +104,9 @@ public class FenetreCreation extends JFrame implements ActionListener, FocusList
 		mainPanel.add(label2);
 		mainPanel.add(text1);
 		mainPanel.add(text2);
+		mainPanel.add(textBrowse);
+		mainPanel.add(browse);
+		mainPanel.add(labelData);
 		setContentPane(mainPanel);
 		
 		setVisible(true);
@@ -110,6 +129,13 @@ public class FenetreCreation extends JFrame implements ActionListener, FocusList
 		if(e.getSource()==del2) {
 			if(symbols.getSelectedIndex()!=-1) {
 				listModel2.remove(symbols.getSelectedIndex());
+			}
+		}
+		if(e.getSource()==browse) {
+			int returnVal = fc.showOpenDialog(this);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				textBrowse.setText(file.getAbsolutePath());
 			}
 		}
 		
