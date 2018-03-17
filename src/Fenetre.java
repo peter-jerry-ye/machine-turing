@@ -24,10 +24,20 @@ public class Fenetre extends JFrame{
 		table = new JTable();
 		status = new JLabel();
 		ruban = new JPanel();
-		start = new JButton();
-		stop = new JButton();
-		accelerate = new JButton();
-		decelerate = new JButton();
+		start = new JButton(
+				new ImageIcon("../images/Play_128px.png"));
+		start.setToolTipText("Play");
+		stop = new JButton(
+				new ImageIcon("../images/Pause_128px.png"));
+		stop.setToolTipText("Pause");
+		accelerate = new JButton(
+				new ImageIcon("../images/Fast_forward_128px.png"));
+		accelerate.setToolTipText("Accelerate");
+		decelerate = new JButton(
+				new ImageIcon("../images/Rewind_128px.png"));
+		decelerate.setToolTipText("Decelerate");
+
+
 		
 		// Layout pour le fenetre
 		JPanel controlPanel = new JPanel();
