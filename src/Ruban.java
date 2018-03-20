@@ -1,7 +1,8 @@
 import java.util.*;
 
-public class Ruban<Character> extends LinkedList<Character> {
+public class Ruban {
 	private int pointeur = 0;
+	private LinkedList<Character> r;
 	Ruban() {
 		super();
 	}
@@ -10,15 +11,15 @@ public class Ruban<Character> extends LinkedList<Character> {
 	}
 	public void ecriture(char symbole) {
 		if(pointeur < 0) {
-			addFirst(symbole);
+			r.addFirst(symbole);
 			pointeur = 0;
-		} else if(pointeur > this.size()) {
-			addLast(symbole);
+		} else if(pointeur > r.size()) {
+			r.addLast(symbole);
 		} else {
-			this.set(pointeur, symbole);
+			r.set(pointeur, symbole);
 		}
 	}
-	public int lecture() {
-		return this.get(pointeur);
+	public char lecture() {
+		return r.get(pointeur);
 	}
 }
