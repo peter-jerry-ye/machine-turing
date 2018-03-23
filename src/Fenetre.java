@@ -16,12 +16,20 @@ public class Fenetre extends JFrame{
 	private Timer timer;
 	// interval d'execution de machine. En millisecond
 	private int interval; 
+	private Turing_Machine machine;
+	private String[] columnTitle = {"Current Status", "Symbol read"
+			, "New Status", "Symbol written", "Action"};
 
 	public Fenetre(){
 		super("Machine de Turing");
 
 		// Initialization des composants
-		table = new JTable();
+		table = new JTable(null, columnTitle){
+			@Override
+			public boolean isCellEditable(int row, int column){
+				return false;
+			}
+		};
 		status = new JLabel();
 		ruban = new JPanel();
 		start = new JButton(
@@ -36,8 +44,6 @@ public class Fenetre extends JFrame{
 		decelerate = new JButton(
 				new ImageIcon("../images/Rewind_128px.png"));
 		decelerate.setToolTipText("Decelerate");
-
-
 		
 		// Layout pour le fenetre
 		JPanel controlPanel = new JPanel();
@@ -55,6 +61,34 @@ public class Fenetre extends JFrame{
 		this.add(table, BorderLayout.CENTER);
 		
 		// Actions des buttons
+		start.addActionListener( event -> {
+					if(timer == null){
+						timer = new Timer(
+								interval, e -> machine.next());
+						// TODO: update panel and labels with SwingWorker
+						timer.start();
+					}
+					else{
+						timer.setDelay(interval);
+						timer.start();
+					}
+
+				});
+		stop.addActionListener( event -> {
+					timer.stop();
+				});
+		accelerate.addActionListener( event -> {
+					interval += 100;
+					if(timer != null){
+						timer.setDelay(interval);
+					}
+				});
+		decelerate.addActionListener( event -> {
+					interval -= 100;
+					if(timer != null){
+						timer.setDelay(interval);
+					}
+				});
 
 		// Creation de Menu
 		JMenuBar menuBar = new JMenuBar();
