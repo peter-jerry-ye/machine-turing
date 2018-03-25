@@ -1,156 +1,239 @@
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
+import javax.swing.event.*;
 
-public class FenetreCreation extends JFrame implements ActionListener, FocusListener{
+public class FenetreCreation extends JFrame{
 	
 	private static final long serialVersionUID = 1L;
 
-	JPanel mainPanel;
-	JTextField text1, text2, textBrowse;
-	JList<String> states, symbols;
-	JScrollPane scrollStates, scrollSymbols;
-	JButton ok, cancel, add1, add2, del1, del2, browse;
-	JLabel label1, label2, labelData;
-	JFileChooser fc;
-	FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files","txt");
-	DefaultListModel<String> listModel1, listModel2;
+	private JPanel mainPanel, entryPanel, buttonState, buttonSymbol, buttonValidation;
+	private JTextField text1, text2, textBrowse;
+	private JList<String> states, symbols;
+	private JScrollPane scrollStates, scrollSymbols, scrollTable;
+	private JButton ok, cancel, add1, add2, del1, del2, browse;
+	private JLabel label1, label2, labelData;
+	private JFileChooser fc;
+	private FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files","txt");
+	private DefaultListModel<String> modelStates, modelSymbols;
+	private GridBagConstraints c;
+	private JTable table;
+	private File file;
+	private DefaultTableModel tableModel;
+	private String FileDirectory;
+	private JComboBox<String> selNext, selState;
 	
-	public FenetreCreation(){
+	public static void initialiseMachine(){
+		new FenetreCreation();
+		
+	}
+	
+	
+	private FenetreCreation(){
 		super("Machine de Turing - Creation");
-		setSize(500,530);
-		setLocation(100,100);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		setSize(1000,450);
+		setLocation(100, 100);
 		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 		
 		label1 = new JLabel("States :");
-		label1.setBounds(15,30,120,20);
-		
 		label2 = new JLabel("Symbols :");
-		label2.setBounds(150,30,120,20);
 		
-		listModel1 = new DefaultListModel<String>();
-		states = new JList<String>(listModel1);
+		String[] colNames = {"State", "Seen", "Change to", "NewState", "Move"};
+		
+		modelStates = new DefaultListModel<String>();
+		states = new JList<String>(modelStates);
 		states.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		states.setVisibleRowCount(10);
-		
 		scrollStates = new JScrollPane(states);
-		scrollStates.setBounds(15,50,120,200);
 		
-		listModel2 = new DefaultListModel<String>();
-		symbols = new JList<String>(listModel2);
+		modelSymbols = new DefaultListModel<String>();
+		symbols = new JList<String>(modelSymbols);
 		symbols.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		symbols.setVisibleRowCount(10);
-		
 		scrollSymbols = new JScrollPane(symbols);
-		scrollSymbols.setBounds(150,50,120,200);
 		
-		text1 = new JTextField();
-		text1.setBounds(15, 255, 120, 25);
+		selNext = new JComboBox<String>();
+		selState = new JComboBox<String>();
 		
+		states.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent evt){
+				if(!evt.getValueIsAdjusting()){
+					if(modelSymbols.size()!=0){
+						tableModel.setRowCount(modelSymbols.size());
+						tableModel.setValueAt(states.getSelectedValue(), 0, 0);
+						for(int i = 0; i<modelSymbols.size(); i++){
+							tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
+						}
+						table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
+						table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
+					} else {
+						tableModel.setRowCount(1);
+						tableModel.setValueAt(states.getSelectedValue(), 0, 0);
+					}
+				}
+			}			
+		});
+		
+		modelSymbols.addListDataListener(new ListDataListener() {
+			public void intervalAdded(ListDataEvent evt) {
+				tableModel.setRowCount(modelSymbols.size());
+				for(int i = 0; i<modelSymbols.size(); i++){
+					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
+				}
+				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
+				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
+			}
+			
+			public void intervalRemoved(ListDataEvent evt) {
+				tableModel.setRowCount(modelSymbols.size());
+				for(int i = 0; i<modelSymbols.size(); i++){
+					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
+				}
+				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
+				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
+			}
+			
+			public void contentsChanged(ListDataEvent evt) {
+				tableModel.setRowCount(modelSymbols.size());
+				for(int i = 0; i<modelSymbols.size(); i++){
+					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
+				}
+				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
+				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
+			}
+		});
+		
+		
+		
+		text1 = new JTextField();		
 		text2 = new JTextField();
-		text2.setBounds(150, 255, 120, 25);
 		
 		ok = new JButton("OK");
-		ok.setBounds(300,455,80,30);
 		
 		cancel = new JButton("Cancel");
-		cancel.setBounds(395,455,80,30);
 		
 		add1 = new JButton("+");
-		add1.setBounds(15,285,55,25);
-		add1.addActionListener(this);
+		add1.addActionListener( e -> {
+			modelStates.addElement(text1.getText());
+			selState.addItem(text1.getText());
+			text1.setText(null);
+		});
 		
 		add2 = new JButton("+");
-		add2.setBounds(150,285,55,25);
-		add2.addActionListener(this);
+		add2.addActionListener( e -> {
+			modelSymbols.addElement(text2.getText());
+			selNext.addItem(text2.getText());
+			text2.setText(null);
+		});
 		
 		del1 = new JButton("-");
-		del1.setBounds(80,285,55,25);
-		del1.addActionListener(this);
+		del1.addActionListener( e -> {
+			if(states.getSelectedIndex()!=-1) {
+				selState.removeItem(modelStates.getElementAt(states.getSelectedIndex()));
+				modelStates.remove(states.getSelectedIndex());
+				}
+		});
 		
 		del2 = new JButton("-");
-		del2.setBounds(215,285,55,25);
-		del2.addActionListener(this);
+		del2.addActionListener( e -> {
+			if(symbols.getSelectedIndex()!=-1) {
+				selNext.removeItem(modelSymbols.getElementAt(symbols.getSelectedIndex()));
+				modelSymbols.remove(symbols.getSelectedIndex());
+			}
+		});
 		
-		labelData = new JLabel("Data :");
-		labelData.setBounds(15, 325, 200, 25);		
+		buttonState = new JPanel(new GridLayout(1, 2, 10, 0));
+		buttonState.add(add1);
+		buttonState.add(del1);
 		
+		buttonSymbol = new JPanel(new GridLayout(1, 2, 10, 0));
+		buttonSymbol.add(add2);
+		buttonSymbol.add(del2);
+		
+		labelData = new JLabel("Data :");	
 		textBrowse = new JTextField();
-		textBrowse.setBounds(15, 350, 155, 25);
+		textBrowse.setEditable(false);
+		textBrowse.setBackground(Color.white);
 		
 		browse = new JButton("Browse...");
-		browse.setBounds(180, 350, 90, 25);
-		browse.addActionListener(this);
+		browse.addActionListener( e -> {
+			int returnVal = fc.showOpenDialog(this);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				textBrowse.setText(file.getAbsolutePath());
+				FileDirectory = file.getAbsolutePath();
+			}
+		});
 		
 		fc = new JFileChooser();
 		fc.setFileFilter(filter);
 		
-		mainPanel = new JPanel();
-		mainPanel.setLayout(null);
-		mainPanel.setBounds(0, 0, 500, 400);
-		//mainPanel.setBackground(Color.BLACK);
-		mainPanel.add(scrollStates);
-		mainPanel.add(scrollSymbols);
-		mainPanel.add(ok);
-		mainPanel.add(cancel);
-		mainPanel.add(add1);
-		mainPanel.add(add2);
-		mainPanel.add(del1);
-		mainPanel.add(del2);
-		mainPanel.add(label1);
-		mainPanel.add(label2);
-		mainPanel.add(text1);
-		mainPanel.add(text2);
-		mainPanel.add(textBrowse);
-		mainPanel.add(browse);
-		mainPanel.add(labelData);
+		table = new JTable(0,5);
+		tableModel = (DefaultTableModel) table.getModel();
+		tableModel.setColumnIdentifiers(colNames);
+		
+		scrollTable = new JScrollPane(table);		
+		
+		entryPanel = new JPanel(new GridBagLayout());
+		
+		c = new GridBagConstraints();
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.insets = new Insets(5, 10, 5, 10);
+		c.fill = GridBagConstraints.BOTH;
+		
+		entryPanel.add(labelData,c);
+		
+		c.gridy = 1;
+		c.gridx = 0;
+		c.gridwidth = 3;
+		entryPanel.add(textBrowse,c);
+		
+		c.gridx = 3;
+		entryPanel.add(browse,c);
+		
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 1;
+		entryPanel.add(label1,c);
+		
+		c.gridx = 2;
+		entryPanel.add(label2, c);
+		
+		c.gridy = 3;
+		c.gridx = 0;
+		c.gridwidth = 2;
+		entryPanel.add(buttonState,c);
+		
+		c.gridx = 2;
+		entryPanel.add(buttonSymbol,c);
+		
+		c.gridy = 4;
+		c.gridx = 0;
+		entryPanel.add(text1,c);
+		
+		c.gridy = 5;
+		entryPanel.add(scrollStates,c);
+		
+		c.gridx = 2;
+		c.gridy = 4;
+		entryPanel.add(text2,c);
+		
+		c.gridy = 5;
+		entryPanel.add(scrollSymbols,c);
+		
+		buttonValidation = new JPanel(new GridLayout(1, 2, 10, 0));
+		buttonValidation.add(ok);
+		buttonValidation.add(cancel);
+		
+		mainPanel = new JPanel(new BorderLayout());
+		mainPanel.add(entryPanel, BorderLayout.WEST);	
+		mainPanel.add(scrollTable, BorderLayout.EAST);
+		mainPanel.add(buttonValidation, BorderLayout.SOUTH);
 		setContentPane(mainPanel);
-		
+		pack();
 		setVisible(true);
-	}
-	
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource()==add1) {
-			listModel1.addElement(text1.getText());
-			text1.setText(null);
-		}
-		if(e.getSource()==add2) {
-			listModel2.addElement(text2.getText());
-			text2.setText(null);
-		}
-		if(e.getSource()==del1) {
-			if(states.getSelectedIndex()!=-1) {
-				listModel1.remove(states.getSelectedIndex());
-			}
-		}
-		if(e.getSource()==del2) {
-			if(symbols.getSelectedIndex()!=-1) {
-				listModel2.remove(symbols.getSelectedIndex());
-			}
-		}
-		if(e.getSource()==browse) {
-			int returnVal = fc.showOpenDialog(this);
-			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
-				textBrowse.setText(file.getAbsolutePath());
-			}
-		}
-		
-	}
-	
-	public void focusGained(FocusEvent e) {
-		if(e.getSource()==text1 && text1.getText().isEmpty()) {
-			
-		}
-		if(e.getSource()==text2 && text2.getText().isEmpty()) {
-			
-		}
-	}
-	
-	public void focusLost(FocusEvent e) {
-		
 	}
 }
