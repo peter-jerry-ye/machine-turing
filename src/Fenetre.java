@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -25,7 +26,12 @@ public class Fenetre extends JFrame{
 		super("Machine de Turing");
 
 		// Initialization des composants
-		table = new JTable();
+		table = new JTable(){
+			@Override
+			public boolean isCellEditable(int row, int column){
+				return false;
+			}
+		};
 		status = new JLabel();
 		ruban = new JTextField("");
 		ruban.setEditable(false);
@@ -174,9 +180,9 @@ public class Fenetre extends JFrame{
 			}
 		}
 	}
-	private class ChangeTable extends SwingWorker<JTable, Object>{
+	private class ChangeTable extends SwingWorker<DefaultTableModel, Object>{
 		@Override
-		public JTable doInBackground(){
+		public DefaultTableModel doInBackground(){
 			// TODO: changer des variables
 			List<String> symbols = null;
 			List<String> status = null;
@@ -205,17 +211,12 @@ public class Fenetre extends JFrame{
 					}
 				}
 			}
-			return new JTable(excel, columnTitle){
-				@Override
-				public boolean isCellEditable(int row, int column){
-					return false;
-				}
-			};
+			return new DefaultTableModel(excel, columnTitle);
 		}
 		@Override
 		public void done(){
 			try {
-				table = get();
+				table.setModel(get());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
