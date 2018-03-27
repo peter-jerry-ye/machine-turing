@@ -3,6 +3,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.io.*;
 /**
  * Le fenetre pour la machine de Turing.
  * @author YE Zihang
@@ -10,6 +11,7 @@ import java.util.List;
 public class Fenetre extends JFrame{
 	private JTable table;
 	private JLabel status;
+	private JLabel speed;
 	private JTextField ruban;
 	private JButton start;
 	private JButton stop;
@@ -17,7 +19,7 @@ public class Fenetre extends JFrame{
 	private JButton decelerate;
 	private Timer timer;
 	// interval d'execution de machine. En millisecond
-	private int interval; 
+	private int interval = 200; 
 	private Turing_Machine machine;
 	private String[] columnTitle = {"Current Status", "Symbol read"
 			, "New Status", "Symbol written", "Action"};
@@ -33,6 +35,7 @@ public class Fenetre extends JFrame{
 			}
 		};
 		status = new JLabel();
+		speed = new JLabel("Vitesse: " + interval);
 		ruban = new JTextField("");
 		ruban.setEditable(false);
 		start = new JButton(
@@ -59,7 +62,10 @@ public class Fenetre extends JFrame{
 		controlPanel.add(stop);
 		controlPanel.add(start);
 		controlPanel.add(accelerate);
-		controlPanel.add(status);
+		JPanel infoPanel = new JPanel(new GridLayout(1, 2));
+		infoPanel.add(speed);
+		infoPanel.add(status);
+		controlPanel.add(infoPanel);
 		JScrollPane scrollPane = new JScrollPane(ruban);
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridLayout(2, 1));
@@ -76,7 +82,6 @@ public class Fenetre extends JFrame{
 									machine.next();
 									new Update().execute();
 								});
-						// TODO: update panel and labels with SwingWorker
 						timer.start();
 					}
 					else{
@@ -100,6 +105,7 @@ public class Fenetre extends JFrame{
 					if(timer != null){
 						timer.setDelay(interval);
 					}
+					speed.setText("Vitesse: " + interval);
 				});
 		decelerate.addActionListener( event -> {
 					interval -= 100;
@@ -110,6 +116,7 @@ public class Fenetre extends JFrame{
 					if(timer != null){
 						timer.setDelay(interval);
 					}
+					speed.setText("Vitesse: " + interval);
 				});
 
 		// Creation de Menu
@@ -141,6 +148,29 @@ public class Fenetre extends JFrame{
 		// Actions des menus
 		// TODO: actions des menus
 		// TODO: when adding a machine, enable all the buttons
+		// TODO: ajouter des cas des exceptions
+		newMachine.addActionListener(event -> {
+		});
+		newRuban.addActionListener(event -> {
+			try {
+				String input = JOptionPane.showInputDialog(Fenetre.this,
+						"Entrez votre ruban.\n" + 
+						"Le ruban commence par un chiffre qui signfie " +
+						"la position initiale de la tete\n" + 
+						"Les reste sont separer par espace",
+						"");
+				input += " ";
+				if(!input.matches("\\d+ (\\w+ )+")){
+					throw new IllegalArgumentException("Il faut suivre les consignes");
+				}
+				// TODO: cree Ruban
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		readMachine.addActionListener(event -> {
+		});
 		readRuban.addActionListener(event -> {
 					timer.stop();
 					stop.setEnabled(false);
@@ -151,6 +181,38 @@ public class Fenetre extends JFrame{
 						machine.changerRuban(chooser.getSelectedFile().getAbsolutePath());
 					}
 				});
+		writeMachine.addActionListener(event -> {
+		});
+		writeRuban.addActionListener(event -> {
+			timer.stop();
+			stop.setEnabled(false);
+			start.setEnabled(true);
+			JFileChooser chooser = new JFileChooser();
+			int returnVal = chooser.showSaveDialog(Fenetre.this);
+			if(returnVal == JFileChooser.APPROVE_OPTION){
+				try (PrintWriter writer = new PrintWriter(
+						new FileWriter(chooser.getSelectedFile()))){
+					// TODO: get Ruban
+					Ruban ban = null;
+					List<String> ruban = ban.getRuban();
+					writer.print(ruban.size() + " ");
+					for(String s : ruban){
+						writer.print(s + " ");
+					}
+					writer.println();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(Fenetre.this, 
+							e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		about.addActionListener(event -> {
+			JOptionPane.showMessageDialog(Fenetre.this, 
+					"Machine de Turing\nMini Projet de cours INFO\n" + 
+					"Cree par Zihang YE, Teck Wong, Gabriel WANTZ, " +
+					"Corentin VANNIER",
+					"A propos", JOptionPane.INFORMATION_MESSAGE);
+		});
 
 		// Parametre de Fenetre
 		this.setSize(1000, 700);
@@ -175,6 +237,7 @@ public class Fenetre extends JFrame{
 			try {
 				ruban.setText(get());
 				ruban.setScrollOffset(offset);
+				// update status
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -191,6 +254,7 @@ public class Fenetre extends JFrame{
 			final int move_Right = 1;
 			int[][][] tableAction = null;
 			Object[][] excel = new Object[symbols.size()*status.size()][5];
+			// tableAction premier indice: etat, deuxieme indice: symbol
 			for(int i = 0; i < symbols.size(); i++){
 				for(int j = 0; j < status.size(); j++){
 					int[] translation = tableAction[j][i];
