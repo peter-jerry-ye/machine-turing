@@ -9,9 +9,9 @@ public class Ruban {
 	private ArrayList<Integer> ruban;
 	private ArrayList<String> tConversion;
 
-	public static final String separateur = " ";
-	public static final int gauche = -1;
-	public static final int droite = 1;
+	public static final String SEPARATEUR = " ";
+	public static final int GAUCHE = -1;
+	public static final int DROITE = 1;
 
 	/**
 	 * Constructeur de ruban
@@ -20,7 +20,7 @@ public class Ruban {
 	 */
 	public Ruban(String texte, ArrayList<String> tableauConversion) {
 		tConversion = tableauConversion;
-		String[] donnees = texte.split(separateur);
+		String[] donnees = texte.split(SEPARATEUR);
 		// OBTENTION DE LA POSITION DE LA TETE
 		try {
 			pointeur = Integer.parseInt(donnees[0]);
@@ -46,9 +46,9 @@ public class Ruban {
 	 * @param direction Entier indiquant dans quel sens le pointeur se déplace
 	 */
 	public void deplacement(int direction) {
-		if(direction == gauche) {
+		if(direction == GAUCHE) {
 			pointeur -= 1;
-		} else if(direction == droite) {
+		} else if(direction == DROITE) {
 			pointeur += 1;
 		}
 	}
@@ -86,7 +86,7 @@ public class Ruban {
 				e.printStackTrace();
 				System.out.println("Probleme lors de la conversion des indices du ruban aux entiers correspondants.");
 			}
-			symboles += symbole + separateur;
+			symboles += symbole + SEPARATEUR;
 		}
 		return symboles;
 	}
