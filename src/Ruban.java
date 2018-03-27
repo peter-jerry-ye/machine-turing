@@ -15,24 +15,11 @@ public class Ruban {
 
 	/**
 	 * Constructeur de ruban
-	 * @param adresse      Adresse du fichier texte contenant les informations sur le ruban
+	 * @param adresse      Texte contenant les informations sur le ruban
 	 * @param tableauConversion    Tableau de conversion des symboles contenus dans le ruban en entier
 	 */
-	public Ruban(String adresse, ArrayList<String> tableauConversion) {
-		int indice;
-		String texte = "";
+	public Ruban(String texte, ArrayList<String> tableauConversion) {
 		tConversion = tableauConversion;
-		// LECTURE DU FICHIER TEXTE
-		try {
-			List<String> lignes = Files.readAllLines(Paths.get(adresse), Charset.defaultCharset());
-			for(String ligne : lignes) {
-				texte += ligne;
-			}
-		} catch (Exception e) {
-        	e.printStackTrace();
-			System.out.println("Impossible de lire le fichier contenant les informations du ruban.");
-        }
-		// DECOUPAGE DU TEXTE EN TABLEAU
 		String[] donnees = texte.split(separateur);
 		// OBTENTION DE LA POSITION DE LA TETE
 		try {
@@ -43,6 +30,7 @@ public class Ruban {
 			System.out.println("La premiere valeur du fichier texte contenant les informations du ruban n'est pas un entier, impossible de recuperer la position de la tete.");
 		}
 		// OBTENTION DES SYMBOLES DU RUBAN
+		int indice;
 		ruban = new ArrayList<Integer>(donnees.length); // initialisaton de la capacité du ruban
 		for(int i = 1; i < donnees.length; i ++) {
 			indice = tConversion.indexOf(donnees[i]);
