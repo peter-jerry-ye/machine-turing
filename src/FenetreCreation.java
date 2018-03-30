@@ -1,182 +1,262 @@
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
+import java.util.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 
 public class FenetreCreation extends JFrame{
 	
-	private static final long serialVersionUID = 1L;
-
-	private JPanel mainPanel, entryPanel, buttonState, buttonSymbol, buttonValidation;
-	private JTextField text1, text2, textBrowse;
-	private JList<String> states, symbols;
-	private JScrollPane scrollStates, scrollSymbols, scrollTable;
-	private JButton ok, cancel, add1, add2, del1, del2, browse;
-	private JLabel label1, label2, labelData;
+	private JLabel labelEtat, labelSym, labelDon;
+	private JButton ok, annuler, ajoutSym, ajoutEtat, suppSym, suppEtat, parcourir;
+	private JTextField textEtat, textSym, textPar;
 	private JFileChooser fc;
-	private FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files","txt");
-	private DefaultListModel<String> modelStates, modelSymbols;
-	private GridBagConstraints c;
-	private JTable table;
 	private File file;
-	private DefaultTableModel tableModel;
-	private String FileDirectory;
-	private JComboBox<String> selNext, selState;
+	private String repertoire;
+
+	private JList<String> etats, symboles;
+	private DefaultListModel<String> modelEtat, modelSym;
+	private JScrollPane scrollEtat, scrollSym, scrollTab;
 	
-	public static void initialiseMachine(){
+	private JPanel mainPanel, entryPanel, boutonEtat, boutonSym, boutonVal;
+	private GridBagConstraints c;
+	
+	private JTable tab;
+	private JComboBox<String> selSym, selEtat, selDeplace;
+	private ArrayList<String> tabSym, tabEtat;
+	private DefaultTableModel emptyMod;
+	private HashMap<String, DefaultTableModel> tabModel;
+	
+	private int[][][] tabAct;
+	
+	private static boolean valide;
+	
+	public static Turing_Machine initialiseMachine() {
 		new FenetreCreation();
-		
+		while(!valide) {
+		}
+		Turing_Machine machine = new Turing_Machine(tabAct, tabSym, tabEtat);
+		return machine;
 	}
 	
-	
-	private FenetreCreation(){
+	private FenetreCreation() {
 		super("Machine de Turing - Creation");
 		setSize(1000,450);
 		setLocation(100, 100);
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);	
 		
-		label1 = new JLabel("States :");
-		label2 = new JLabel("Symbols :");
-		
-		String[] colNames = {"State", "Seen", "Change to", "NewState", "Move"};
-		
-		modelStates = new DefaultListModel<String>();
-		states = new JList<String>(modelStates);
-		states.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		states.setVisibleRowCount(10);
-		scrollStates = new JScrollPane(states);
-		
-		modelSymbols = new DefaultListModel<String>();
-		symbols = new JList<String>(modelSymbols);
-		symbols.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		symbols.setVisibleRowCount(10);
-		scrollSymbols = new JScrollPane(symbols);
-		
-		selNext = new JComboBox<String>();
-		selState = new JComboBox<String>();
-		
-		states.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent evt){
-				if(!evt.getValueIsAdjusting()){
-					if(modelSymbols.size()!=0){
-						tableModel.setRowCount(modelSymbols.size());
-						tableModel.setValueAt(states.getSelectedValue(), 0, 0);
-						for(int i = 0; i<modelSymbols.size(); i++){
-							tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
-						}
-						table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
-						table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
-					} else {
-						tableModel.setRowCount(1);
-						tableModel.setValueAt(states.getSelectedValue(), 0, 0);
-					}
-				}
-			}			
-		});
-		
-		modelSymbols.addListDataListener(new ListDataListener() {
-			public void intervalAdded(ListDataEvent evt) {
-				tableModel.setRowCount(modelSymbols.size());
-				for(int i = 0; i<modelSymbols.size(); i++){
-					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
-				}
-				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
-				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
-			}
-			
-			public void intervalRemoved(ListDataEvent evt) {
-				tableModel.setRowCount(modelSymbols.size());
-				for(int i = 0; i<modelSymbols.size(); i++){
-					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
-				}
-				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
-				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
-			}
-			
-			public void contentsChanged(ListDataEvent evt) {
-				tableModel.setRowCount(modelSymbols.size());
-				for(int i = 0; i<modelSymbols.size(); i++){
-					tableModel.setValueAt((String)modelSymbols.getElementAt(i), i, 1);
-				}
-				table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selNext));
-				table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selState));
-			}
-		});
-		
-		
-		
-		text1 = new JTextField();		
-		text2 = new JTextField();
+		labelEtat = new JLabel("Etats :");
+		labelSym = new JLabel("Symboles :");
+		labelDon = new JLabel("Donnee :");
 		
 		ok = new JButton("OK");
+		annuler = new JButton("Annuler");
+		ajoutEtat = new JButton("+");
+		suppEtat = new JButton("-");
+		ajoutSym = new JButton("+");
+		suppSym = new JButton("-");
+		parcourir = new JButton("Parcourir...");
+		fc = new JFileChooser();
+		fc.setFileFilter(new FileNameExtensionFilter("Text Files","txt"));
 		
-		cancel = new JButton("Cancel");
+		textEtat = new JTextField();
+		textSym = new JTextField();
+		textPar = new JTextField();
+		textPar.setEditable(false);
+		textPar.setBackground(Color.white);
 		
-		add1 = new JButton("+");
-		add1.addActionListener( e -> {
-			modelStates.addElement(text1.getText());
-			selState.addItem(text1.getText());
-			text1.setText(null);
+		modelEtat = new DefaultListModel<String>();
+		etats = new JList<String>(modelEtat);
+		etats.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		etats.setVisibleRowCount(10);
+		scrollEtat = new JScrollPane(etats);
+		
+		modelSym = new DefaultListModel<String>();
+		symboles = new JList<String>(modelSym);
+		symboles.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		symboles.setVisibleRowCount(10);
+		scrollSym = new JScrollPane(symboles);
+		
+		selSym = new JComboBox<String>();
+		selEtat = new JComboBox<String>();
+		selDeplace = new JComboBox<String>();
+		selEtat.addItem("eFinale");
+		selSym.addItem("#");
+		selDeplace.addItem("Gauche");
+		selDeplace.addItem("Droite");
+		selDeplace.addItem("Statique");
+		
+		tabModel = new HashMap<String, DefaultTableModel>();
+		String[] colId = {"Etat", "Vue", "Changer à", "Prochain Etat", "Deplacement"};
+		emptyMod = new DefaultTableModel(0,5);
+		emptyMod.setColumnIdentifiers(colId);
+		tab = new JTable(emptyMod);
+		scrollTab = new JScrollPane(tab);
+		
+		tabSym = new ArrayList<String>();
+		tabEtat = new ArrayList<String>();
+		
+		valide = false;
+		
+		ajoutEtat.addActionListener( e -> {
+			String data = textEtat.getText();
+			if(!modelEtat.contains(data) && !data.isEmpty() && !data.contains(" ") && !data.equals("eFinale")){
+				modelEtat.addElement(data);
+				tabEtat.add(data);
+				tabModel.put(data, new DefaultTableModel(0,4) {
+					@Override
+					public boolean isCellEditable(int row, int column) {
+						return !(column == 0 || column == 1);
+					}
+				});
+				tabModel.get(data).setColumnIdentifiers(colId);
+				tabModel.get(data).addRow(new Object[] {data,"","","",""});
+				for(int i = 0; i<modelSym.size(); i++) {
+					if(i==0) {
+						tabModel.get(data).setValueAt(modelSym.get(i), i, 1);
+					} else {
+						tabModel.get(data).addRow(new Object[] {"", modelSym.get(i), "", "", ""});
+					}
+				}
+				selEtat.addItem(data);
+			}
+			textEtat.setText(null);
 		});
 		
-		add2 = new JButton("+");
-		add2.addActionListener( e -> {
-			modelSymbols.addElement(text2.getText());
-			selNext.addItem(text2.getText());
-			text2.setText(null);
-		});
-		
-		del1 = new JButton("-");
-		del1.addActionListener( e -> {
-			if(states.getSelectedIndex()!=-1) {
-				selState.removeItem(modelStates.getElementAt(states.getSelectedIndex()));
-				modelStates.remove(states.getSelectedIndex());
+		suppEtat.addActionListener( e -> {
+			int index = etats.getSelectedIndex();
+			if(index!=-1) {
+				String data = etats.getSelectedValue();
+				modelEtat.remove(index);
+				tabEtat.remove(index);
+				tabModel.remove(data);
+				selEtat.removeItem(data);
 				}
 		});
+
+		ajoutSym.addActionListener( e -> {
+			String data = textSym.getText();
+			if(!modelSym.contains(data) && !data.isEmpty() && !data.contains(" ") && !data.equals("#")){
+				modelSym.addElement(data);
+				tabSym.add(data);
+				if(modelSym.size()==1) {
+					for(String s : tabModel.keySet()) {
+						tabModel.get(s).setValueAt(data, 0, 1);
+					}
+				} else {
+					for(String s : tabModel.keySet()) {
+						tabModel.get(s).addRow(new Object[] {"", data, "", "", ""});
+					}
+				}
+				selSym.addItem(data);
+			}
+			textSym.setText(null);
+		});
 		
-		del2 = new JButton("-");
-		del2.addActionListener( e -> {
-			if(symbols.getSelectedIndex()!=-1) {
-				selNext.removeItem(modelSymbols.getElementAt(symbols.getSelectedIndex()));
-				modelSymbols.remove(symbols.getSelectedIndex());
+		suppSym.addActionListener( e -> {
+			int index = symboles.getSelectedIndex();
+			if(index!=-1) {
+				selSym.removeItem(modelSym.getElementAt(index));
+				tabSym.remove(index);
+				modelSym.remove(index);
+				for(DefaultTableModel d : tabModel.values()) {
+					d.removeRow(index);
+					if(index == 0 && d.getRowCount() == 0) {
+						d.addRow(new Object[] {etats.getSelectedValue(),"", "", "", ""});
+					}else if(index == 0) {
+						d.setValueAt(etats.getSelectedValue(), 0, 0);
+					}
+				}
 			}
 		});
 		
-		buttonState = new JPanel(new GridLayout(1, 2, 10, 0));
-		buttonState.add(add1);
-		buttonState.add(del1);
-		
-		buttonSymbol = new JPanel(new GridLayout(1, 2, 10, 0));
-		buttonSymbol.add(add2);
-		buttonSymbol.add(del2);
-		
-		labelData = new JLabel("Data :");	
-		textBrowse = new JTextField();
-		textBrowse.setEditable(false);
-		textBrowse.setBackground(Color.white);
-		
-		browse = new JButton("Browse...");
-		browse.addActionListener( e -> {
+		parcourir.addActionListener( e -> {
 			int returnVal = fc.showOpenDialog(this);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				textBrowse.setText(file.getAbsolutePath());
-				FileDirectory = file.getAbsolutePath();
+				textPar.setText(file.getAbsolutePath());
+				repertoire = file.getAbsolutePath();
 			}
 		});
 		
-		fc = new JFileChooser();
-		fc.setFileFilter(filter);
+		annuler.addActionListener( e -> {
+			this.dispose();
+		});
 		
-		table = new JTable(0,5);
-		tableModel = (DefaultTableModel) table.getModel();
-		tableModel.setColumnIdentifiers(colNames);
+		ok.addActionListener( e -> {
+			try {
+				if(tabEtat.isEmpty() || tabSym.isEmpty()) {
+					throw new Exception();
+				} else {
+					tabAct = new int[tabEtat.size()][tabSym.size()][3];
+					for(int i = 0; i<tabAct.length; i++) {
+						String etat = tabEtat.get(i);
+						for(int j = 0; j<tabAct[i].length; j++) {
+							String newSym = (String)tabModel.get(etat).getValueAt(j, 2);
+							String newEtat = (String)tabModel.get(etat).getValueAt(j, 3);
+							String dep = (String)tabModel.get(etat).getValueAt(j, 4);
+							
+							if(newSym==""||newEtat==""||dep=="") {
+								throw new Exception();
+							}
+							
+							if(newSym.equals("#")) {
+								tabAct[i][j][0] = -1;
+							} else {
+								tabAct[i][j][0] = tabSym.indexOf(newSym);
+							}
+							
+							
+							if(newEtat.equals("eFinale")) {
+								tabAct[i][j][1] = -1;
+							} else {
+								tabAct[i][j][1] = tabEtat.indexOf(newEtat);
+							}
+							
+							
+							if(dep.equals("Gauche")) {
+								tabAct[i][j][2] = 1;
+							}else if(dep.equals("Droite")) {
+								tabAct[i][j][2] = -1;
+							}else if(dep.equals("Statique")) {
+								tabAct[i][j][2] = 0;
+							}
+						}
+					}
+					valide = true;
+					this.dispose();
+				}
+			} catch(Exception n) {
+				JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs de saisie!", "", JOptionPane.WARNING_MESSAGE);
+			}
+		});
 		
-		scrollTable = new JScrollPane(table);		
+		etats.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent evt){
+				if(!evt.getValueIsAdjusting()){
+					if(!modelEtat.isEmpty() && etats.getSelectedIndex()!=-1) {
+						tab.setModel(tabModel.get(etats.getSelectedValue()));
+					}else {
+						tab.setModel(emptyMod);
+					}					
+				}
+				tab.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(selSym));
+				tab.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(selEtat));
+				tab.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(selDeplace));
+			}
+		});
 		
 		entryPanel = new JPanel(new GridBagLayout());
+		mainPanel = new JPanel(new BorderLayout());
+		boutonVal = new JPanel(new GridLayout(1, 2, 0, 0));
+		boutonEtat = new JPanel(new GridLayout(1, 2, 10, 0));
+		boutonSym = new JPanel(new GridLayout(1, 2, 10, 0));
+		
+		boutonEtat.add(ajoutEtat);
+		boutonEtat.add(suppEtat);
+		boutonSym.add(ajoutSym);
+		boutonSym.add(suppSym);		
 		
 		c = new GridBagConstraints();
 		c.gridheight = 1;
@@ -184,54 +264,51 @@ public class FenetreCreation extends JFrame{
 		c.insets = new Insets(5, 10, 5, 10);
 		c.fill = GridBagConstraints.BOTH;
 		
-		entryPanel.add(labelData,c);
+		entryPanel.add(labelDon,c);
 		
 		c.gridy = 1;
 		c.gridx = 0;
 		c.gridwidth = 3;
-		entryPanel.add(textBrowse,c);
+		entryPanel.add(textPar,c);
 		
 		c.gridx = 3;
-		entryPanel.add(browse,c);
+		entryPanel.add(parcourir,c);
 		
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridwidth = 1;
-		entryPanel.add(label1,c);
+		entryPanel.add(labelEtat,c);
 		
 		c.gridx = 2;
-		entryPanel.add(label2, c);
+		entryPanel.add(labelSym, c);
 		
 		c.gridy = 3;
 		c.gridx = 0;
 		c.gridwidth = 2;
-		entryPanel.add(buttonState,c);
+		entryPanel.add(boutonEtat,c);
 		
 		c.gridx = 2;
-		entryPanel.add(buttonSymbol,c);
+		entryPanel.add(boutonSym,c);
 		
 		c.gridy = 4;
 		c.gridx = 0;
-		entryPanel.add(text1,c);
+		entryPanel.add(textEtat,c);
 		
 		c.gridy = 5;
-		entryPanel.add(scrollStates,c);
+		entryPanel.add(scrollEtat,c);
 		
 		c.gridx = 2;
 		c.gridy = 4;
-		entryPanel.add(text2,c);
+		entryPanel.add(textSym,c);
 		
 		c.gridy = 5;
-		entryPanel.add(scrollSymbols,c);
+		entryPanel.add(scrollSym,c);
 		
-		buttonValidation = new JPanel(new GridLayout(1, 2, 10, 0));
-		buttonValidation.add(ok);
-		buttonValidation.add(cancel);
-		
-		mainPanel = new JPanel(new BorderLayout());
+		boutonVal.add(ok);
+		boutonVal.add(annuler);		
 		mainPanel.add(entryPanel, BorderLayout.WEST);	
-		mainPanel.add(scrollTable, BorderLayout.EAST);
-		mainPanel.add(buttonValidation, BorderLayout.SOUTH);
+		mainPanel.add(scrollTab, BorderLayout.EAST);
+		mainPanel.add(boutonVal, BorderLayout.SOUTH);
 		setContentPane(mainPanel);
 		pack();
 		setVisible(true);
