@@ -1,31 +1,56 @@
 import java.util.*;
 import java.lang.Math;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
 
 public class Ruban {
 	private int pointeur;
 	private ArrayList<Integer> ruban;
 	private ArrayList<String> tConversion;
+
+	public static final String SEPARATEUR = " ";
+	public static final int GAUCHE = -1;
+	public static final int DROITE = 1;
+
 	/**
 	 * Constructeur de ruban
-	 * @param texte      Chaîne de caractères contenant la position initiale du pointeur et le contenu du ruban
-	 * @param separateur Caractère séparant les différentes valeurs de la variable texte
-	 * @param tableau    Tableau de conversion des symboles contenus dans le ruban en entier
+	 * @param adresse      Texte contenant les informations sur le ruban
+	 * @param tableauConversion    Tableau de conversion des symboles contenus dans le ruban en entier
 	 */
-	Ruban(String texte, String separateur, ArrayList<String> tableau) {
-		String[] donnees = texte.split(separateur);
-		tConversion = tableau;
-		pointeur = Integer.parseInt(donnees[0]); // la première donnée est la position initiale du pointeur
+	public Ruban(String texte, ArrayList<String> tableauConversion) {
+		tConversion = tableauConversion;
+		String[] donnees = texte.split(SEPARATEUR);
+		// OBTENTION DE LA POSITION DE LA TETE
+		try {
+			pointeur = Integer.parseInt(donnees[0]);
+		}
+		catch(NumberFormatException e) {
+			e.printStackTrace();
+			System.out.println("La premiere valeur du fichier texte contenant les informations du ruban n'est pas un entier, impossible de recuperer la position de la tete.");
+		}
+		// OBTENTION DES SYMBOLES DU RUBAN
+		int indice;
 		ruban = new ArrayList<Integer>(donnees.length); // initialisaton de la capacité du ruban
 		for(int i = 1; i < donnees.length; i ++) {
-			 ruban.add(tConversion.indexOf(donnees[i])); // ajout de l'entier correspondant au symbole
+			indice = tConversion.indexOf(donnees[i]);
+			if(indice != -1) {
+				ruban.add(tConversion.indexOf(donnees[i])); // ajout de l'entier correspondant au symbole
+			} else {
+				System.out.println("Le symbole " + (i + 1) + " du fichier texte contenant les informations du ruban n'appartient pas a l'alphabet de la machine, impossible de creer le ruban.");
+			}
 		}
 	}
 	/**
 	 * Déplacer le pointeur d'une case (vers la gauche ou vers la droite)
-	 * @param direction Entier valant -1 pour un déplacement vers la gauche ou 1 pour un déplacement vers la droite
+	 * @param direction Entier indiquant dans quel sens le pointeur se déplace
 	 */
 	public void deplacement(int direction) {
-		pointeur += direction;
+		if(direction == GAUCHE) {
+			pointeur -= 1;
+		} else if(direction == DROITE) {
+			pointeur += 1;
+		}
 	}
 	/**
 	 * Écrire un symbole à l'emplacement actuel du pointeur
@@ -48,23 +73,21 @@ public class Ruban {
 		return ruban.get(pointeur);
 	}
 	/**
-	 * Renoyer la position actuelle du pointeur
-	 * @return Valeur de la variable pointeur
+	 * Renvoyer la position de la tête et le contenu du pointeur
+	 * @return String contenant la position du pointeur entre parenthèses puis les symmboles du ruban séparés par des espaces
 	 */
-	public int getPointeur() {
-		return pointeur;
-	}
-	/**
-	 * Renvoyer le ruban pour l'affichage
-	 * @return ArrayList contenant les symboles du ruban
-	 */
-	public ArrayList<String> getRuban() {
-		ArrayList<String> caracteres = new ArrayList<String>(ruban.size());
-		String caractere;
+	public String toString() {
+		String symbole = "";
+		String symboles = "(" + pointeur + ") ";
 		for(int i = 0; i < ruban.size(); i ++) {
-			caractere = tConversion.get(ruban.get(i)); // obtention du caractère à partir du tableau de conversion
-			caracteres.set(i, caractere);
+			try {
+				symbole = tConversion.get(ruban.get(i)); // obtention du caractère à partir du tableau de conversion
+			} catch(IndexOutOfBoundsException e) {
+				e.printStackTrace();
+				System.out.println("Probleme lors de la conversion des indices du ruban aux entiers correspondants.");
+			}
+			symboles += symbole + SEPARATEUR;
 		}
-		return caracteres;
+		return symboles;
 	}
 }
