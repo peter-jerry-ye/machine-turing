@@ -52,15 +52,15 @@ public class Turing_Machine {
 
 			String ligneSelectionnee;
 			ligneSelectionnee = lignes.get(LIGNE_ETATS);
-			if(!ligneSelectionnee.matches("(\\S+ )?\\S"))
+			if(!ligneSelectionnee.matches("(\\S+ )*\\S+"))
 				throw new IllegalArgumentException("Tableau des etats n'est pas bon");
 			tableauConversionEtats = new ArrayList<String>(Arrays.asList(ligneSelectionnee.split(" ")));
 			ligneSelectionnee = lignes.get(LIGNE_SYMBOLES);
-			if(!ligneSelectionnee.matches("(\\S+ )?\\S"))
+			if(!ligneSelectionnee.matches("(\\S+ )*\\S+"))
 				throw new IllegalArgumentException("Tableau des symboles n'est pas bon");
 			tableauConversionSymboles = new ArrayList<String>(Arrays.asList(ligneSelectionnee.split(" ")));
 			ligneSelectionnee = lignes.get(LIGNE_TABLEAU);
-			if(!ligneSelectionnee.matches("((((((-?\\d)+:)*-?\\d),)*(((-?\\d)+:)*-?\\d))/)*(((((-?\\d)+:)*-?\\d),)*(((-?\\d)+:)*-?\\d))"))
+			if(!ligneSelectionnee.matches("((((((-?\\d)+:)*-?\\d+),)*(((-?\\d)+:)*-?\\d+))/)*(((((-?\\d)+:)*-?\\d+),)*(((-?\\d)+:)*-?\\d+))"))
 				throw new IllegalArgumentException("Tableau des actions n'est pas bon");
 
 			//Construction du tableau
@@ -112,6 +112,7 @@ public class Turing_Machine {
 	 */
 	public void changerRuban(String ruban){
 		this.ruban = new Ruban(ruban,tableauConversionSymboles);
+		this.etat = 0;
 	}
 	public boolean hasRuban(){
 		return this.ruban != null;
@@ -123,26 +124,32 @@ public class Turing_Machine {
 
 	public void enregistrerMachine(Path adresse) throws IOException{
 		try (PrintWriter fichier = new PrintWriter(adresse.toFile())) {
-			String texte = "";
+			StringBuilder texte = new StringBuilder();
 			for(String unEtat : tableauConversionEtats){
-				texte+= unEtat + " ";
+				texte.append(unEtat + " ");
 			}
-			texte+= "\n";
+			texte.deleteCharAt(texte.length() - 1);
+			fichier.println(texte);
+			texte.delete(0, texte.length());
 			for(String unSymbole : tableauConversionSymboles){
-				texte+= unSymbole + " ";
+				texte.append(unSymbole + " ");
 			}
-			texte+= "\n";
+			texte.deleteCharAt(texte.length() - 1);
+			fichier.println(texte);
+			texte.delete(0, texte.length());
 			
 			for(int i=0;i<tableauAction.length;i++){
 				for(int j=0;j<tableauAction[i].length;j++){
 					for(int k=0;k<3;k++){
-						texte+=tableauAction[i][j][k]+":";
+						texte.append(tableauAction[i][j][k]+":");
 					}
-					texte += ",";
+					texte.deleteCharAt(texte.length() - 1);
+					texte.append(",");
 				}
-				texte += "/";
+				texte.deleteCharAt(texte.length() - 1);
+				texte.append("/");
 			}
-			
+			texte.deleteCharAt(texte.length() - 1);
 			fichier.print(texte);
 		}
 	}

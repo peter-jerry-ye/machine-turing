@@ -102,7 +102,7 @@ public class Ruban {
 				builder.append(tConversion.get(ruban.get(i)) + " ");
 			}
 			else {
-				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
+				builder.append("[" + tConversion.get(ruban.get(i)) + "] ");
 			}
 		}
 		builder.deleteCharAt(builder.length() - 1); // enleve l'espace

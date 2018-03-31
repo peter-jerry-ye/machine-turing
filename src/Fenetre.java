@@ -105,10 +105,10 @@ public class Fenetre extends JFrame{
 		});
 		accelerate.addActionListener( event -> {
 			interval -= 100;
-			if(interval >= 1000)
-				decelerate.setEnabled(false);
-			if(interval > 100)
-				accelerate.setEnabled(true);
+			if(interval <= 100)
+				accelerate.setEnabled(false);
+			if(interval < 2000)
+				decelerate.setEnabled(true);
 			if(timer != null){
 				timer.setDelay(interval);
 			}
@@ -116,10 +116,10 @@ public class Fenetre extends JFrame{
 		});
 		decelerate.addActionListener( event -> {
 			interval += 100;
-			if(interval < 1000)
-				decelerate.setEnabled(true);
-			if(interval <= 100)
-				accelerate.setEnabled(false);
+			if(interval > 100)
+				accelerate.setEnabled(true);
+			if(interval >= 2000)
+				decelerate.setEnabled(false);
 			if(timer != null){
 				timer.setDelay(interval);
 			}
@@ -158,6 +158,8 @@ public class Fenetre extends JFrame{
 			}
 			try {
 				new ChangeMachine().execute();
+				newMachine.setEnabled(false);
+				readMachine.setEnabled(false);
 			}
 			catch (Exception e) {
 				JOptionPane.showMessageDialog(Fenetre.this,
@@ -243,14 +245,11 @@ public class Fenetre extends JFrame{
 				stop.setEnabled(true);
 			}
 			try {
-					timer.stop();
-					stop.setEnabled(true);
-					start.setEnabled(true);
-					JFileChooser chooser = new JFileChooser();
-					int returnVal = chooser.showSaveDialog(Fenetre.this);
-					if(returnVal == JFileChooser.APPROVE_OPTION) {
-						machine.enregistrerMachine(chooser.getSelectedFile().toPath());
-					}
+				JFileChooser chooser = new JFileChooser();
+				int returnVal = chooser.showSaveDialog(Fenetre.this);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					machine.enregistrerMachine(chooser.getSelectedFile().toPath());
+				}
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(Fenetre.this,
 						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -327,23 +326,22 @@ public class Fenetre extends JFrame{
 			int[][][] tableAction = machine.getTableau();
 			Object[][] excel = new Object[symbols.size() * status.size()][5];
 			// tableAction premier indice: etat, deuxieme indice: symbol
-			// TODO pensez au etat/symbol -1
 			for(int i = 0; i < tableAction.length; i++){
 				for(int j = 0; j < tableAction[i].length; j++){
 					int[] translation = tableAction[i][j];
-					excel[i * status.size() + j][0] = status.get(i);
-					excel[i * status.size() + j][1] = symbols.get(j);
-					excel[i * status.size() + j][2] = translation[1] != -1 ? status.get(translation[1]) : "Etat Finale";
-					excel[i * status.size() + j][3] = symbols.get(translation[0]);
+					excel[i * symbols.size() + j][0] = status.get(i);
+					excel[i * symbols.size() + j][1] = symbols.get(j);
+					excel[i * symbols.size() + j][2] = translation[1] != -1 ? status.get(translation[1]) : "Etat Finale";
+					excel[i * symbols.size() + j][3] = symbols.get(translation[0]);
 					switch(translation[2]){
 						case move_Left:
-							excel[i * status.size() + j][4] = "Deplacer vers gauche";
+							excel[i * symbols.size() + j][4] = "Deplacer vers gauche";
 							break;
 						case move_Right:
-							excel[i * status.size() + j][4] = "Deplacer vers droite";
+							excel[i * symbols.size() + j][4] = "Deplacer vers droite";
 							break;
 						case stay:
-							excel[i * status.size() + j][4] = "Ne pas bouger";
+							excel[i * symbols.size() + j][4] = "Ne pas bouger";
 							break;
 					}
 				}
@@ -384,6 +382,8 @@ public class Fenetre extends JFrame{
 			newRuban.setEnabled(machine != null);
 			readRuban.setEnabled(machine != null);
 			writeMachine.setEnabled(machine != null);
+			newMachine.setEnabled(true);
+			readMachine.setEnabled(true);
 		}
 	}
 }
