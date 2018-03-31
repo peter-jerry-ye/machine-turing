@@ -20,7 +20,7 @@ public class Ruban {
 	 */
 	public Ruban(String texte, ArrayList<String> tableauConversion) {
 		tConversion = tableauConversion;
-		if(!texte.matches("\\d+ (\\S+ )?\\S"))
+		if(!texte.matches("(\\S+ )*\\S+") || !texte.contains("[") || !texte.contains("]"))
 			throw new IllegalArgumentException("Le ruban n'a pas de bon format");
 		String[] donnees = texte.split(SEPARATEUR);
 
