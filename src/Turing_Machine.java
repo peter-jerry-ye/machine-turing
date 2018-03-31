@@ -73,7 +73,7 @@ public class Turing_Machine {
 			}
 		}
 		catch (IOException e) {
-			throw e;
+			throw new IllegalArgumentException(e.getMessage());
         	}
 	}
 	/**
