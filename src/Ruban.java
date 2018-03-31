@@ -99,10 +99,10 @@ public class Ruban {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < ruban.size(); i++){
 			if(i != pointeur) {
-				builder.append(tConversion.get(i) + " ");
+				builder.append(tConversion.get(ruban.get(i)) + " ");
 			}
 			else {
-				builder.append("[ " + tConversion.get(i) + " ] ");
+				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
 			}
 		}
 		builder.deleteCharAt(builder.length() - 1); // enleve l'espace
