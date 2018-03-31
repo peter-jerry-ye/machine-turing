@@ -20,24 +20,20 @@ public class Ruban {
 	 */
 	public Ruban(String texte, ArrayList<String> tableauConversion) {
 		tConversion = tableauConversion;
+		if(!texte.matches("\\d+ (\\S+ )?\\S"))
+			throw new IllegalArgumentException("Le ruban n'a pas de bon format");
 		String[] donnees = texte.split(SEPARATEUR);
 		// OBTENTION DE LA POSITION DE LA TETE
-		try {
-			pointeur = Integer.parseInt(donnees[0]);
-		}
-		catch(NumberFormatException e) {
-			e.printStackTrace();
-			System.out.println("La premiere valeur du fichier texte contenant les informations du ruban n'est pas un entier, impossible de recuperer la position de la tete.");
-		}
+		pointeur = Integer.parseInt(donnees[0]);
 		// OBTENTION DES SYMBOLES DU RUBAN
 		int indice;
-		ruban = new ArrayList<Integer>(donnees.length); // initialisaton de la capacité du ruban
+		ruban = new ArrayList<Integer>(); // initialisaton de la capacité du ruban
 		for(int i = 1; i < donnees.length; i ++) {
 			indice = tConversion.indexOf(donnees[i]);
 			if(indice != -1) {
-				ruban.add(tConversion.indexOf(donnees[i])); // ajout de l'entier correspondant au symbole
+				ruban.add(indice);// ajout de l'entier correspondant au symbole
 			} else {
-				System.out.println("Le symbole " + (i + 1) + " du fichier texte contenant les informations du ruban n'appartient pas a l'alphabet de la machine, impossible de creer le ruban.");
+				throw new IllegalArgumentException("Le symbole " + (i + 1) + "n'est pas un symboles de cette machine");
 			}
 		}
 	}
@@ -59,9 +55,13 @@ public class Ruban {
 	public void ecriture(int symbole) {
 		if(pointeur > ruban.size()) {
 			ruban.add(symbole);
-		} else {
+		} 
+		else if(pointeur < 0) {
+			pointeur = 0;
+			ruban.add(pointeur, symbole);
+		}
+		else {
 			// direction vaut 1 ou -1, donc au minimum pointeur vaut -1
-			pointeur = Math.max(pointeur, 0);
 			ruban.set(pointeur, symbole);
 		}
 	}
@@ -76,6 +76,7 @@ public class Ruban {
 	 * Renvoyer la position de la tête et le contenu du pointeur
 	 * @return String contenant la position du pointeur entre parenthèses puis les symmboles du ruban séparés par des espaces
 	 */
+	@Override
 	public String toString() {
 		String symbole = "";
 		String symboles = "(" + pointeur + ") ";
@@ -89,5 +90,22 @@ public class Ruban {
 			symboles += symbole + SEPARATEUR;
 		}
 		return symboles;
+	}
+	/**
+	 * Renvoyer le ruban sous la forme de String
+	 * @return String qui répresent cette ruban
+	 */
+	public String imprimer() {
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < ruban.size(); i++){
+			if(i != pointeur) {
+				builder.append(tConversion.get(ruban.get(i)) + " ");
+			}
+			else {
+				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
+			}
+		}
+		builder.deleteCharAt(builder.length() - 1); // enleve l'espace
+		return builder.toString();
 	}
 }
