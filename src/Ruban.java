@@ -23,6 +23,7 @@ public class Ruban {
 		if(!texte.matches("\\d+ (\\S+ )?\\S"))
 			throw new IllegalArgumentException("Le ruban n'a pas de bon format");
 		String[] donnees = texte.split(SEPARATEUR);
+
 		// OBTENTION DES SYMBOLES DU RUBAN
 		int indice;
 		ruban = new ArrayList<Integer>(); // initialisaton de la capacité du ruban
@@ -79,6 +80,23 @@ public class Ruban {
 	 */
 	@Override
 	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < ruban.size(); i++){
+			if(i != pointeur) {
+				builder.append(tConversion.get(ruban.get(i)) + " ");
+			}
+			else {
+				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
+			}
+		}
+		builder.deleteCharAt(builder.length() - 1); // enleve l'espace
+		return builder.toString();
+	}
+	/**
+	 * Renvoyer le ruban sous la forme de String
+	 * @return String qui répresent cette ruban
+	 */
+	public String imprimer() {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < ruban.size(); i++){
 			if(i != pointeur) {
