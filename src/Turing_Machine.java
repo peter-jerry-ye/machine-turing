@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.io.File;
+import java.io.PrintWriter;
 import java.io.IOException;
 
 public class Turing_Machine {
@@ -11,6 +12,17 @@ public class Turing_Machine {
 	private final int LIGNE_ETATS = 0;
 	private final int LIGNE_SYMBOLES = 1;
 	private final int LIGNE_TABLEAU = 2;
+	
+	private final int DEPLACEMENT_GAUCHE = -1;
+	private final int NE_PAS_BOUGER = 0;
+	private final int DEPLACEMENT_DROITE = 1;
+	
+	private final int NOUVEAU_SYMBOLE = 0;
+	private final int NOUVEL_ETAT = 1;
+	private final int NOUVEAU_DEPLACEMENT = 2;
+	
+	private final int ETAT_FINAL = -1;
+	
 
 	private Ruban ruban;
 	private String rubanOriginal = "";
@@ -20,10 +32,10 @@ public class Turing_Machine {
 	private int[][][] tableauAction;
 	private int etat = 0;
 	/**
-	 * [Turing_Machine description]
-	 * @param tableauAct         [description]
-	 * @param tableauConvEtat    [description]
-	 * @param tableauConvSymbole [description]
+	 * Constructeur de la machine à partir de chaque élément
+	 * @param tableauAct         Le tableau d'action normalisé
+	 * @param tableauConvEtat    L'alphabet des états, ou chaque String est associé à son indice
+	 * @param tableauConvSymbole L'alphabet des symboles, ou chaque String est associé à son indice
 	 */
 	public Turing_Machine(int[][][] tableauAct, ArrayList<String> tableauConvEtat, ArrayList<String> tableauConvSymbole){
 		tableauConversionEtats = tableauConvEtat;
@@ -31,8 +43,8 @@ public class Turing_Machine {
 		tableauAction = tableauAct;
 	}
 	/**
-	 * [Turing_Machine description]
-	 * @param adresse [description]
+	 * Constructeur de la machine à partir d'un fichier texte
+	 * @param adresse Le fichier dans lequel est stocké la machine de Turing
 	 */
 	public Turing_Machine(File adresse){
 		try{
@@ -64,61 +76,79 @@ public class Turing_Machine {
 					actions = symboles[j].split(":");
 					for(int k=0;k<3;k++){
 						tableauAction[i][j][k] = Integer.parseInt(actions[k]);
-						// TODO: remove sysout
-						System.out.print(tableauAction[i][j][k]+" ");
+						
 					}
-					System.out.print(" | ");
 				}
-				System.out.println();
 			}
 		}
 		catch (IOException e) {
 			throw new IllegalArgumentException(e.getMessage());
         	}
 	}
-	/**
-	 * [main description]
-	 * @param args [description]
-	 */
+	
 	public static void main(String[] args){
-		Turing_Machine machine = new Turing_Machine(new File("../examplesTA/Turing_Machine_Add"));
+		Turing_Machine machine = new Turing_Machine(new File("../exemplesTA/Turing_Machine_Add"));
 	}
+	
 	/**
-	 * [next description]
+	 * Avance d'une action dans la machine de Turing
 	 */
 	public void next(){
 
-		if(etat == -1)
-			return;
+		if(etat == ETAT_FINAL)return;
 
 		int symbole = ruban.lecture();
 		int[] actions = tableauAction[etat][symbole];
 
-		ruban.ecriture(actions[0]);
-		this.etat = actions[1];
-		ruban.deplacement(actions[2]);
+		ruban.ecriture(actions[NOUVEAU_SYMBOLE]);
+		ruban.deplacement(actions[NOUVEAU_DEPLACEMENT]);
+		this.etat = actions[NOUVEL_ETAT];
 
 	}
+	
 	/**
-	 * [changerRuban description]
-	 * @param  ruban [description]
+	 * Crée un nouveau ruban
+	 * @param  la chaîne de caractère contenant les symboles du ruban
 	 */
 	public void changerRuban(String ruban){
 		this.ruban = new Ruban(ruban,tableauConversionSymboles);
 	}
-	public String afficherRuban(){
-		return ruban.toString();
-	}
 	public boolean hasRuban(){
 		return this.ruban != null;
 	}
+	
+	public String afficherRuban(){
+		return ruban.toString();
+	}
 
 	public void enregistrerMachine(Path adresse) throws IOException{
-		//TODO:
+		try (PrintWriter fichier = new PrintWriter(adresse.toFile())) {
+			String texte = "";
+			for(String unEtat : tableauConversionEtats){
+				texte+= unEtat + " ";
+			}
+			texte+= "\n";
+			for(String unSymbole : tableauConversionSymboles){
+				texte+= unSymbole + " ";
+			}
+			texte+= "\n";
+			
+			for(int i=0;i<tableauAction.length;i++){
+				for(int j=0;j<tableauAction[i].length;j++){
+					for(int k=0;k<3;k++){
+						texte+=tableauAction[i][j][k]+":";
+					}
+					texte += ",";
+				}
+				texte += "/";
+			}
+			
+			fichier.print(texte);
+		}
 	}
 
 	public String getEtat(){
-		return etat == -1 ? "Etat finale" : tableauConversionEtats.get(etat);
+		return etat == ETAT_FINAL ? "Etat final" : tableauConversionEtats.get(etat);
 	}
 	
 	public int[][][] getTableau(){
