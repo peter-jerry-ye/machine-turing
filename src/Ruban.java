@@ -12,6 +12,7 @@ public class Ruban {
 	public static final String SEPARATEUR = " ";
 	public static final int GAUCHE = -1;
 	public static final int DROITE = 1;
+	public static final int RESTER = 0;
 
 	/**
 	 * Constructeur de ruban
@@ -25,17 +26,28 @@ public class Ruban {
 		String[] donnees = texte.split(SEPARATEUR);
 
 		// OBTENTION DES SYMBOLES DU RUBAN
+		// TODO: remove try catch
 		int indice;
 		ruban = new ArrayList<Integer>(); // initialisaton de la capacité du ruban
-		for(int i = 1; i < donnees.length; i ++) {
-			indice = tConversion.indexOf(donnees[i]);
-			if(indice != -1) {
-				ruban.add(indice);// ajout de l'entier correspondant au symbole
-				if(donnees[i].matches("[\\S+]")){
-					pointeur = ruban.size();
+		for(int i = 0; i < donnees.length; i ++) {
+			if(donnees[i].matches("\\[\\S+\\]")){
+				indice = tConversion.indexOf(donnees[i].substring(1, donnees[i].length() - 1));
+				if(indice != -1) {
+					ruban.add(indice);
+					pointeur = ruban.size() - 1;
+					continue;
 				}
-			} else {
-				throw new IllegalArgumentException("Le symbole " + (i + 1) + "n'est pas un symboles de cette machine");
+				else {
+					throw new IllegalArgumentException("Le symbole " + donnees[i] + " n'est pas un symboles de cette machine");
+				}
+			}
+			else {
+				indice = tConversion.indexOf(donnees[i]);
+				if(indice != -1) {
+					ruban.add(indice);// ajout de l'entier correspondant au symbole
+				} else {				
+					throw new IllegalArgumentException("Le symbole " + donnees[i] + " n'est pas un symboles de cette machine");
+				}
 			}
 		}
 	}
@@ -49,13 +61,17 @@ public class Ruban {
 		} else if(direction == DROITE) {
 			pointeur += 1;
 		}
+		if(pointeur < 0 || pointeur >= ruban.size()) {
+			ecriture(0);
+		}
+
 	}
 	/**
 	 * Écrire un symbole à l'emplacement actuel du pointeur
 	 * @param symbole Symbole à écrire
 	 */
 	public void ecriture(int symbole) {
-		if(pointeur > ruban.size()) {
+		if(pointeur >= ruban.size()) {
 			ruban.add(symbole);
 		} 
 		else if(pointeur < 0) {
@@ -80,23 +96,6 @@ public class Ruban {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for(int i = 0; i < ruban.size(); i++){
-			if(i != pointeur) {
-				builder.append(tConversion.get(ruban.get(i)) + " ");
-			}
-			else {
-				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
-			}
-		}
-		builder.deleteCharAt(builder.length() - 1); // enleve l'espace
-		return builder.toString();
-	}
-	/**
-	 * Renvoyer le ruban sous la forme de String
-	 * @return String qui répresent cette ruban
-	 */
-	public String imprimer() {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < ruban.size(); i++){
 			if(i != pointeur) {

@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CyclicBarrier;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -30,14 +31,21 @@ public class FenetreCreation extends JFrame{
 	
 	private int[][][] tabAct;
 	
-	private static boolean valide;
+	private static CyclicBarrier barrier = new CyclicBarrier(2);
+	private static Turing_Machine machine = null;
 	
-	public static Turing_Machine initialiseMachine() {
+	public static Turing_Machine initialiseMachine(){
 		new FenetreCreation();
-		while(!valide) {
+		try {
+			barrier.await();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null,
+					e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			return null;
 		}
-		Turing_Machine machine = new Turing_Machine(tabAct, tabSym, tabEtat);
-		return machine;
+		Turing_Machine tmp = machine;
+		machine = null;
+		return tmp;
 	}
 	
 	private FenetreCreation() {
@@ -45,7 +53,7 @@ public class FenetreCreation extends JFrame{
 		setSize(1000,450);
 		setLocation(100, 100);
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);	
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
 		
 		labelEtat = new JLabel("Etats :");
 		labelSym = new JLabel("Symboles :");
@@ -98,7 +106,8 @@ public class FenetreCreation extends JFrame{
 		tabSym = new ArrayList<String>();
 		tabEtat = new ArrayList<String>();
 		
-		valide = false;
+		modelSym.addElement("#");
+		tabSym.add("#");
 		
 		ajoutEtat.addActionListener( e -> {
 			String data = textEtat.getText();
@@ -157,7 +166,7 @@ public class FenetreCreation extends JFrame{
 		
 		suppSym.addActionListener( e -> {
 			int index = symboles.getSelectedIndex();
-			if(index!=-1) {
+			if(index!=-1 && !modelSym.getElementAt(index).equals("#")) {
 				selSym.removeItem(modelSym.getElementAt(index));
 				tabSym.remove(index);
 				modelSym.remove(index);
@@ -181,6 +190,11 @@ public class FenetreCreation extends JFrame{
 		});
 		
 		annuler.addActionListener( e -> {
+			try {
+				barrier.await();
+			}
+			catch(Exception ex) {
+			}
 			this.dispose();
 		});
 		
@@ -201,11 +215,11 @@ public class FenetreCreation extends JFrame{
 								throw new Exception();
 							}
 							
-							if(newSym.equals("#")) {
-								tabAct[i][j][0] = -1;
-							} else {
+//							if(newSym.equals("#")) {
+//								tabAct[i][j][0] = -1;
+//							} else {
 								tabAct[i][j][0] = tabSym.indexOf(newSym);
-							}
+//							}
 							
 							
 							if(newEtat.equals("eFinale")) {
@@ -216,16 +230,17 @@ public class FenetreCreation extends JFrame{
 							
 							
 							if(dep.equals("Gauche")) {
-								tabAct[i][j][2] = 1;
+								tabAct[i][j][2] = Ruban.GAUCHE;
 							}else if(dep.equals("Droite")) {
-								tabAct[i][j][2] = -1;
+								tabAct[i][j][2] = Ruban.DROITE;
 							}else if(dep.equals("Statique")) {
-								tabAct[i][j][2] = 0;
+								tabAct[i][j][2] = Ruban.RESTER;
 							}
 						}
 					}
-					valide = true;
 					this.dispose();
+					machine = new Turing_Machine(tabAct, tabEtat, tabSym);
+					barrier.await();
 				}
 			} catch(Exception n) {
 				JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs de saisie!", "", JOptionPane.WARNING_MESSAGE);

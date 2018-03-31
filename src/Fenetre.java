@@ -24,6 +24,14 @@ public class Fenetre extends JFrame{
 	private String[] columnTitle = {"Current Status", "Symbol read"
 			, "New Status", "Symbol written", "Action"};
 
+	private JMenuItem newMachine = new JMenuItem("Nouvelle Machine", 'N');
+	private JMenuItem newRuban = new JMenuItem("Nouveau Ruban", 'R');
+	private JMenuItem readMachine = new JMenuItem("Ouvrir Machine", 'O');
+	private JMenuItem readRuban = new JMenuItem("Ouvrir Ruban", 'u');
+	private JMenuItem writeMachine = new JMenuItem("Enregistrer Machine", 'E');
+	private JMenuItem writeRuban = new JMenuItem("Enregistrer Ruban", 'r');
+	private JMenuItem about = new JMenuItem("A propos", 'A');
+		
 	public Fenetre(){
 		super("Machine de Turing");
 
@@ -34,8 +42,8 @@ public class Fenetre extends JFrame{
 				return false;
 			}
 		};
-		status = new JLabel();
-		speed = new JLabel("Vitesse: " + interval);
+		status = new JLabel("Etat: ");
+		speed = new JLabel("Interval: " + interval);
 		ruban = new JTextField("");
 		ruban.setEditable(false);
 		start = new JButton(
@@ -52,8 +60,6 @@ public class Fenetre extends JFrame{
 		decelerate.setToolTipText("Decelerate");
 		start.setEnabled(false);
 		stop.setEnabled(false);
-		accelerate.setEnabled(false);
-		decelerate.setEnabled(false);
 		
 		// Layout pour le fenetre
 		JPanel controlPanel = new JPanel();
@@ -71,65 +77,59 @@ public class Fenetre extends JFrame{
 		panel.setLayout(new GridLayout(2, 1));
 		panel.add(controlPanel);
 		panel.add(scrollPane);
+		JScrollPane tablePane = new JScrollPane(table);
 		this.add(panel, BorderLayout.SOUTH);
-		this.add(table, BorderLayout.CENTER);
+		this.add(tablePane, BorderLayout.CENTER);
 		
 		// Actions des buttons
 		start.addActionListener( event -> {
-					if(timer == null){
-						timer = new Timer(
-								interval, e -> {
-									machine.next();
-									new Update().execute();
-								});
-						timer.start();
-					}
-					else{
-						timer.setDelay(interval);
-						timer.start();
-					}
-					start.setEnabled(false);
-					stop.setEnabled(true);
-				});
+			if(timer == null){
+				timer = new Timer(
+						interval, e -> {
+							machine.next();
+							new Update().execute();
+						});
+				timer.start();
+			}
+			else{
+				timer.setDelay(interval);
+				timer.start();
+			}
+			start.setEnabled(false);
+			stop.setEnabled(true);
+		});
 		stop.addActionListener( event -> {
-					timer.stop();
-					stop.setEnabled(false);
-					start.setEnabled(true);
-				});
+			timer.stop();
+			stop.setEnabled(false);
+			start.setEnabled(true);
+		});
 		accelerate.addActionListener( event -> {
-					interval += 100;
-					if(interval > 1000)
-						accelerate.setEnabled(false);
-					if(interval > 100)
-						decelerate.setEnabled(true);
-					if(timer != null){
-						timer.setDelay(interval);
-					}
-					speed.setText("Vitesse: " + interval);
-				});
+			interval -= 100;
+			if(interval >= 1000)
+				decelerate.setEnabled(false);
+			if(interval > 100)
+				accelerate.setEnabled(true);
+			if(timer != null){
+				timer.setDelay(interval);
+			}
+			speed.setText("Interval: " + interval);
+		});
 		decelerate.addActionListener( event -> {
-					interval -= 100;
-					if(interval < 1100)
-						accelerate.setEnabled(true);
-					if(interval < 200)
-						decelerate.setEnabled(false);
-					if(timer != null){
-						timer.setDelay(interval);
-					}
-					speed.setText("Vitesse: " + interval);
-				});
+			interval += 100;
+			if(interval < 1000)
+				decelerate.setEnabled(true);
+			if(interval <= 100)
+				accelerate.setEnabled(false);
+			if(timer != null){
+				timer.setDelay(interval);
+			}
+			speed.setText("Interval: " + interval);
+		});
 
 		// Creation de Menu
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menuFichier = new JMenu("Fichier");
 		JMenu menuAide = new JMenu("Aide");
-		JMenuItem newMachine = new JMenuItem("Nouvelle Machine", 'N');
-		JMenuItem newRuban = new JMenuItem("Nouveau Ruban", 'R');
-		JMenuItem readMachine = new JMenuItem("Ouvrir Machine", 'O');
-		JMenuItem readRuban = new JMenuItem("Ouvrir Ruban", 'u');
-		JMenuItem writeMachine = new JMenuItem("Enregistrer Machine", 'E');
-		JMenuItem writeRuban = new JMenuItem("Enregistrer Ruban", 'r');
-		JMenuItem about = new JMenuItem("A propos", 'A');
 
 		menuFichier.setMnemonic('F');
 		menuAide.setMnemonic('A');
@@ -145,66 +145,135 @@ public class Fenetre extends JFrame{
 		menuBar.add(menuAide);
 		this.setJMenuBar(menuBar);
 
+		newRuban.setEnabled(false);
+		readRuban.setEnabled(false);
+		writeMachine.setEnabled(false);
+		writeRuban.setEnabled(false);
+
 		// Actions des menus
-		// TODO: actions des menus
-		// TODO: when adding a machine, enable all the buttons
-		// TODO: ajouter des cas des exceptions
 		newMachine.addActionListener(event -> {
-		});
-		newRuban.addActionListener(event -> {
+			if(timer != null && timer.isRunning()){
+				timer.stop();
+				stop.setEnabled(true);
+			}
 			try {
-				String input = JOptionPane.showInputDialog(Fenetre.this,
-						"Entrez votre ruban.\n" + 
-						"Le ruban commence par un chiffre qui signfie " +
-						"la position initiale de la tete\n" + 
-						"Les reste sont separer par espace",
-						"");
-				input += " ";
-				if(!input.matches("\\d+ (\\w+ )+")){
-					throw new IllegalArgumentException("Il faut suivre les consignes");
-				}
-				// TODO: cree Ruban
-			} catch (Exception e) {
+				new ChangeMachine().execute();
+			}
+			catch (Exception e) {
 				JOptionPane.showMessageDialog(Fenetre.this,
 						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
 			}
 		});
+		newRuban.addActionListener(event -> {
+			if(timer != null && timer.isRunning()){
+				timer.stop();
+				stop.setEnabled(true);
+			}
+			try {
+				String input = JOptionPane.showInputDialog(Fenetre.this,
+						"Entrez votre ruban.\n" + 
+						"Les symboles sont separer par espace.\n" + 
+						"La position initiale est entoure par crochet.\n" + 
+						"ex. 1 1 1 + 0 0 [1]",
+						"");
+				if(input == null || input.isEmpty()){
+					start.setEnabled(machine != null && machine.hasRuban());
+					writeRuban.setEnabled(machine != null && machine.hasRuban());
+					return;
+				}
+				else if(!input.matches("(\\S+ )*\\S+") || !input.contains("[") || !input.contains("]")){
+					throw new IllegalArgumentException("Il faut suivre les consignes");
+				}
+				machine.changerRuban(input);
+				ruban.setText(input);
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+			start.setEnabled(machine != null && machine.hasRuban());
+			writeRuban.setEnabled(machine != null && machine.hasRuban());
+		});
 		readMachine.addActionListener(event -> {
+			if(timer != null && timer.isRunning()){
+				timer.stop();
+				stop.setEnabled(true);
+			}
+			try {
+				JFileChooser chooser = new JFileChooser();
+				int returnVal = chooser.showOpenDialog(Fenetre.this);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					machine = new Turing_Machine(chooser.getSelectedFile());
+					new ChangeTable().execute();
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+			start.setEnabled(machine != null && machine.hasRuban());
+			
+			newRuban.setEnabled(machine != null);
+			readRuban.setEnabled(machine != null);
+			writeMachine.setEnabled(machine != null);
 		});
 		readRuban.addActionListener(event -> {
+			if(timer != null && timer.isRunning()){
+				timer.stop();
+				stop.setEnabled(true);
+			}
+			try {
+				JFileChooser chooser = new JFileChooser();
+				int returnVal = chooser.showOpenDialog(Fenetre.this);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()));
+					String s = reader.readLine();
+					machine.changerRuban(s);
+					ruban.setText(s);
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+			start.setEnabled(machine != null && machine.hasRuban());
+
+			writeRuban.setEnabled(machine != null && machine.hasRuban());
+		});
+		writeMachine.addActionListener(event -> {
+			if(timer != null && timer.isRunning()){
+				timer.stop();
+				stop.setEnabled(true);
+			}
+			try {
 					timer.stop();
-					stop.setEnabled(false);
+					stop.setEnabled(true);
 					start.setEnabled(true);
 					JFileChooser chooser = new JFileChooser();
-					int returnVal = chooser.showOpenDialog(Fenetre.this);
+					int returnVal = chooser.showSaveDialog(Fenetre.this);
 					if(returnVal == JFileChooser.APPROVE_OPTION) {
-						machine.changerRuban(chooser.getSelectedFile().getAbsolutePath());
+						machine.enregistrerMachine(chooser.getSelectedFile().toPath());
 					}
-				});
-		writeMachine.addActionListener(event -> {
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+			start.setEnabled(machine != null && machine.hasRuban());
 		});
 		writeRuban.addActionListener(event -> {
-			timer.stop();
-			stop.setEnabled(false);
-			start.setEnabled(true);
+			if(timer != null && timer.isRunning()) {
+				timer.stop();
+				stop.setEnabled(true);
+			}
 			JFileChooser chooser = new JFileChooser();
 			int returnVal = chooser.showSaveDialog(Fenetre.this);
 			if(returnVal == JFileChooser.APPROVE_OPTION){
 				try (PrintWriter writer = new PrintWriter(
 						new FileWriter(chooser.getSelectedFile()))){
-					// TODO: get Ruban
-					Ruban ban = null;
-					List<String> ruban = ban.getRuban();
-					writer.print(ruban.size() + " ");
-					for(String s : ruban){
-						writer.print(s + " ");
-					}
-					writer.println();
+					writer.println(machine.afficherRuban());
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(Fenetre.this, 
 							e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
 				}
 			}
+			start.setEnabled(machine != null && machine.hasRuban());
 		});
 		about.addActionListener(event -> {
 			JOptionPane.showMessageDialog(Fenetre.this, 
@@ -228,8 +297,7 @@ public class Fenetre extends JFrame{
 		@Override
 		public String doInBackground(){
 			offset = ruban.getScrollOffset();
-			String result = "";
-			// TODO: get ruban
+			String result = machine.afficherRuban();
 			return result;
 		}
 		@Override
@@ -237,7 +305,12 @@ public class Fenetre extends JFrame{
 			try {
 				ruban.setText(get());
 				ruban.setScrollOffset(offset);
-				// update status
+				status.setText("Etat: " + machine.getEtat());
+				if(machine.getEtat().equals("Etat finale")){
+					timer.stop();
+					start.setEnabled(false);
+					stop.setEnabled(false);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -246,23 +319,23 @@ public class Fenetre extends JFrame{
 	private class ChangeTable extends SwingWorker<DefaultTableModel, Object>{
 		@Override
 		public DefaultTableModel doInBackground(){
-			// TODO: changer des variables
-			List<String> symbols = null;
-			List<String> status = null;
-			final int move_Left = -1;
-			final int stay = 0;
-			final int move_Right = 1;
-			int[][][] tableAction = null;
-			Object[][] excel = new Object[symbols.size()*status.size()][5];
+			List<String> symbols = machine.getTCSymboles();
+			List<String> status = machine.getTCEtats();
+			final int move_Left = Ruban.GAUCHE;
+			final int stay = Ruban.RESTER;
+			final int move_Right = Ruban.DROITE;
+			int[][][] tableAction = machine.getTableau();
+			Object[][] excel = new Object[symbols.size() * status.size()][5];
 			// tableAction premier indice: etat, deuxieme indice: symbol
-			for(int i = 0; i < symbols.size(); i++){
-				for(int j = 0; j < status.size(); j++){
-					int[] translation = tableAction[j][i];
-					excel[i * status.size() + j][0] = status.get(j);
-					excel[i * status.size() + j][1] = symbols.get(i);
-					excel[i * status.size() + j][2] = status.get(translation[0]);
-					excel[i * status.size() + j][3] = status.get(translation[2]);
-					switch(translation[1]){
+			// TODO pensez au etat/symbol -1
+			for(int i = 0; i < tableAction.length; i++){
+				for(int j = 0; j < tableAction[i].length; j++){
+					int[] translation = tableAction[i][j];
+					excel[i * status.size() + j][0] = status.get(i);
+					excel[i * status.size() + j][1] = symbols.get(j);
+					excel[i * status.size() + j][2] = translation[1] != -1 ? status.get(translation[1]) : "Etat Finale";
+					excel[i * status.size() + j][3] = symbols.get(translation[0]);
+					switch(translation[2]){
 						case move_Left:
 							excel[i * status.size() + j][4] = "Deplacer vers gauche";
 							break;
@@ -281,9 +354,36 @@ public class Fenetre extends JFrame{
 		public void done(){
 			try {
 				table.setModel(get());
+				ruban.setText("");
+				status.setText("Etat: " + machine.getEtat());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	private class ChangeMachine extends SwingWorker<Void, Object>{
+		private Turing_Machine turingMachine = null;
+		@Override
+		public Void doInBackground(){
+			try {
+				turingMachine = FenetreCreation.initialiseMachine();
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(Fenetre.this,
+						e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+			}
+			return null;
+		}
+		@Override
+		public void done(){
+			if(turingMachine != null) {
+				machine = turingMachine;
+				new ChangeTable().execute();
+			}
+			start.setEnabled(machine != null && machine.hasRuban());
+			
+			newRuban.setEnabled(machine != null);
+			readRuban.setEnabled(machine != null);
+			writeMachine.setEnabled(machine != null);
 		}
 	}
 }

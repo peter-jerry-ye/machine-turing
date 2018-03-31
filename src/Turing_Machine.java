@@ -48,7 +48,7 @@ public class Turing_Machine {
 				throw new IllegalArgumentException("Tableau des symboles n'est pas bon");
 			tableauConversionSymboles = new ArrayList<String>(Arrays.asList(ligneSelectionnee.split(" ")));
 			ligneSelectionnee = lignes.get(LIGNE_TABLEAU);
-			if(!ligneSelectionnee.matches("((((((-?\\d)+:)?-?\\d),)?(((-?\\d)+:)?-?\\d))/)?(((((-?\\d)+:)?-?\\d),)?(((-?\\d)+:)?-?\\d))"))
+			if(!ligneSelectionnee.matches("((((((-?\\d)+:)*-?\\d),)*(((-?\\d)+:)*-?\\d))/)*(((((-?\\d)+:)*-?\\d),)*(((-?\\d)+:)*-?\\d))"))
 				throw new IllegalArgumentException("Tableau des actions n'est pas bon");
 
 			//Construction du tableau
@@ -88,12 +88,15 @@ public class Turing_Machine {
 	 */
 	public void next(){
 
+		if(etat == -1)
+			return;
+
 		int symbole = ruban.lecture();
 		int[] actions = tableauAction[etat][symbole];
 
 		ruban.ecriture(actions[0]);
-		ruban.deplacement(actions[1]);
-		this.etat = actions[2];
+		this.etat = actions[1];
+		ruban.deplacement(actions[2]);
 
 	}
 	/**
@@ -106,13 +109,16 @@ public class Turing_Machine {
 	public String afficherRuban(){
 		return ruban.toString();
 	}
+	public boolean hasRuban(){
+		return this.ruban != null;
+	}
 
 	public void enregistrerMachine(Path adresse) throws IOException{
 		//TODO:
 	}
 
 	public String getEtat(){
-		return tableauConversionEtats.get(etat);
+		return etat == -1 ? "Etat finale" : tableauConversionEtats.get(etat);
 	}
 	
 	public int[][][] getTableau(){
