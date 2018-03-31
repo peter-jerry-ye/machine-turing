@@ -1,7 +1,10 @@
 import java.util.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.io.File;
+import java.io.IOException;
 
 public class Turing_Machine {
 
@@ -15,32 +18,38 @@ public class Turing_Machine {
 	private ArrayList<String> tableauConversionSymboles;
 
 	private int[][][] tableauAction;
-	private int etat=0;
+	private int etat = 0;
 	/**
 	 * [Turing_Machine description]
 	 * @param tableauAct         [description]
 	 * @param tableauConvEtat    [description]
 	 * @param tableauConvSymbole [description]
 	 */
-	Turing_Machine(int[][][] tableauAct, ArrayList<String> tableauConvEtat, ArrayList<String> tableauConvSymbole){
+	public Turing_Machine(int[][][] tableauAct, ArrayList<String> tableauConvEtat, ArrayList<String> tableauConvSymbole){
 		tableauConversionEtats = tableauConvEtat;
 		tableauConversionSymboles = tableauConvSymbole;
 		tableauAction = tableauAct;
-		}
+	}
 	/**
 	 * [Turing_Machine description]
 	 * @param adresse [description]
 	 */
-	Turing_Machine(File adresse){
+	public Turing_Machine(File adresse){
 		try{
-			List<String> lignes = Files.readAllLines(/*Paths.get(adresse)*/, Charset.defaultCharset());
+			List<String> lignes = Files.readAllLines(adresse.toPath(), Charset.defaultCharset());
 
 			String ligneSelectionnee;
 			ligneSelectionnee = lignes.get(LIGNE_ETATS);
+			if(!ligneSelectionnee.matches("(\\S+ )?\\S"))
+				throw new IllegalArgumentException("Tableau des etats n'est pas bon");
 			tableauConversionEtats = new ArrayList<String>(Arrays.asList(ligneSelectionnee.split(" ")));
 			ligneSelectionnee = lignes.get(LIGNE_SYMBOLES);
+			if(!ligneSelectionnee.matches("(\\S+ )?\\S"))
+				throw new IllegalArgumentException("Tableau des symboles n'est pas bon");
 			tableauConversionSymboles = new ArrayList<String>(Arrays.asList(ligneSelectionnee.split(" ")));
 			ligneSelectionnee = lignes.get(LIGNE_TABLEAU);
+			if(!ligneSelectionnee.matches("((((((-?\\d)+:)?-?\\d),)?(((-?\\d)+:)?-?\\d))/)?(((((-?\\d)+:)?-?\\d),)?(((-?\\d)+:)?-?\\d))"))
+				throw new IllegalArgumentException("Tableau des actions n'est pas bon");
 
 			//Construction du tableau
 
@@ -55,49 +64,24 @@ public class Turing_Machine {
 					actions = symboles[j].split(":");
 					for(int k=0;k<3;k++){
 						tableauAction[i][j][k] = Integer.parseInt(actions[k]);
+						// TODO: remove sysout
 						System.out.print(tableauAction[i][j][k]+" ");
 					}
 					System.out.print(" | ");
 				}
 				System.out.println();
 			}
-
-
 		}
-		catch (Exception e) {
-         e.printStackTrace();
-        }
-		String separateur=" ";
-
-		}
+		catch (IOException e) {
+			throw new IllegalArgumentException(e.getMessage());
+        	}
+	}
 	/**
 	 * [main description]
 	 * @param args [description]
 	 */
 	public static void main(String[] args){
-
-		int[][][] tableauAction = {
-			{{1,-1,0},{0,-1,1},{2,0,0}},
-			{{0,-1,1},{1,-1,1},{2,-1,2}},
-			{{1,1,3},{0,-1,2},{1,1,3}},
-			{{0,1,3},{1,1,3},{2,1,4}},
-			{{0,1,4},{1,1,5},{2,0,-1}},
-			{{0,1,5},{1,1,5},{2,-1,0}}};
-		LinkedList<Integer> ruban = new LinkedList<Integer>(Arrays.asList(2,0,1,0,1,2,0,1,1,2,2));
-		System.out.println(ruban);
-		int etat=0;
-		int curseur=8;
-
-		while(etat!=-1){
-			int symbole = ruban.get(curseur);
-			int[] actions = tableauAction[etat][symbole];
-
-			ruban.set(curseur,actions[0]);
-			curseur+=actions[1];
-			if(curseur>ruban.size()){break;}
-			etat=actions[2];
-			System.out.println(ruban + "  " + etat);
-		}
+		Turing_Machine machine = new Turing_Machine(new File("../examplesTA/Turing_Machine_Add"));
 	}
 	/**
 	 * [next description]
@@ -115,20 +99,30 @@ public class Turing_Machine {
 	/**
 	 * [changerRuban description]
 	 * @param  ruban [description]
-	 * @return       [description]
 	 */
-	public String changerRuban(String ruban){
-		ruban = new Ruban(ruban,tableauConversionSymboles);
-		}
+	public void changerRuban(String ruban){
+		this.ruban = new Ruban(ruban,tableauConversionSymboles);
+	}
+	public String afficherRuban(){
+		return ruban.toString();
+	}
 
-/*	public String lireRuban(){
-		return ruban.getRuban();
-		}*/
+	public void enregistrerMachine(Path adresse) throws IOException{
+		//TODO:
+	}
 
-	//public enregistrerMachine(Path adresse)
-
-	public String lireEtat(){return tableauConversionEtats.get(etat);}
+	public String getEtat(){
+		return tableauConversionEtats.get(etat);
+	}
 	
-	public int[][][] lireTableau(){return tableauAction;}
+	public int[][][] getTableau(){
+		return tableauAction;
+	}
+	public List<String> getTCEtats(){
+		return Collections.unmodifiableList(tableauConversionEtats);
+	}
+	public List<String> getTCSymboles(){
+		return Collections.unmodifiableList(tableauConversionSymboles);
+	}
 
 }

@@ -23,8 +23,7 @@ public class Ruban {
 		if(!texte.matches("\\d+ (\\S+ )?\\S"))
 			throw new IllegalArgumentException("Le ruban n'a pas de bon format");
 		String[] donnees = texte.split(SEPARATEUR);
-		// OBTENTION DE LA POSITION DE LA TETE
-		pointeur = Integer.parseInt(donnees[0]);
+
 		// OBTENTION DES SYMBOLES DU RUBAN
 		int indice;
 		ruban = new ArrayList<Integer>(); // initialisaton de la capacité du ruban
@@ -32,6 +31,9 @@ public class Ruban {
 			indice = tConversion.indexOf(donnees[i]);
 			if(indice != -1) {
 				ruban.add(indice);// ajout de l'entier correspondant au symbole
+				if(donnees[i].matches("[\\S+]")){
+					pointeur = ruban.size();
+				}
 			} else {
 				throw new IllegalArgumentException("Le symbole " + (i + 1) + "n'est pas un symboles de cette machine");
 			}
@@ -73,23 +75,22 @@ public class Ruban {
 		return ruban.get(pointeur);
 	}
 	/**
-	 * Renvoyer la position de la tête et le contenu du pointeur
-	 * @return String contenant la position du pointeur entre parenthèses puis les symmboles du ruban séparés par des espaces
+	 * Renvoyer le ruban sous la forme de String
+	 * @return String qui répresent cette ruban
 	 */
 	@Override
 	public String toString() {
-		String symbole = "";
-		String symboles = "(" + pointeur + ") ";
-		for(int i = 0; i < ruban.size(); i ++) {
-			try {
-				symbole = tConversion.get(ruban.get(i)); // obtention du caractère à partir du tableau de conversion
-			} catch(IndexOutOfBoundsException e) {
-				e.printStackTrace();
-				System.out.println("Probleme lors de la conversion des indices du ruban aux entiers correspondants.");
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < ruban.size(); i++){
+			if(i != pointeur) {
+				builder.append(tConversion.get(ruban.get(i)) + " ");
 			}
-			symboles += symbole + SEPARATEUR;
+			else {
+				builder.append("[ " + tConversion.get(ruban.get(i)) + " ] ");
+			}
 		}
-		return symboles;
+		builder.deleteCharAt(builder.length() - 1); // enleve l'espace
+		return builder.toString();
 	}
 	/**
 	 * Renvoyer le ruban sous la forme de String
