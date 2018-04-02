@@ -190,6 +190,7 @@ public class Fenetre extends JFrame {
                         e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
             start.setEnabled(machine != null && machine.hasRuban());
+			stop.setEnabled(!start.isEnabled());
             writeRuban.setEnabled(machine != null && machine.hasRuban());
         });
         readMachine.addActionListener(event -> {
@@ -233,7 +234,7 @@ public class Fenetre extends JFrame {
                         e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
             start.setEnabled(machine != null && machine.hasRuban());
-
+			stop.setEnabled(!start.isEnabled());
             writeRuban.setEnabled(machine != null && machine.hasRuban());
         });
         writeMachine.addActionListener(event -> {
@@ -252,6 +253,7 @@ public class Fenetre extends JFrame {
                         e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
             start.setEnabled(machine != null && machine.hasRuban());
+			stop.setEnabled(!start.isEnabled());
         });
         writeRuban.addActionListener(event -> {
             if (timer != null && timer.isRunning()) {
@@ -270,6 +272,7 @@ public class Fenetre extends JFrame {
                 }
             }
             start.setEnabled(machine != null && machine.hasRuban());
+			stop.setEnabled(!start.isEnabled());
         });
         about.addActionListener(event -> {
             JOptionPane.showMessageDialog(Fenetre.this,
@@ -308,9 +311,9 @@ public class Fenetre extends JFrame {
                 ruban.setText(get());
                 ruban.setScrollOffset(offset);
                 status.setText("Etat: " + machine.getEtat());
-                if (machine.getEtat().equals("Etat finale")) {
+                if (machine.getEtat().equals(Turing_Machine.S_ETAT_FINAL)) {
                     timer.stop();
-                    start.setEnabled(false);
+                    start.setEnabled(true);
                     stop.setEnabled(false);
                 }
             } catch (Exception e) {
@@ -338,7 +341,7 @@ public class Fenetre extends JFrame {
                     int[] translation = tableAction[i][j];
                     excel[i * symbols.size() + j][0] = status.get(i);
                     excel[i * symbols.size() + j][1] = symbols.get(j);
-                    excel[i * symbols.size() + j][2] = translation[1] != -1 ? status.get(translation[1]) : "Etat Final";
+                    excel[i * symbols.size() + j][2] = translation[1] != -1 ? status.get(translation[1]) : Turing_Machine.S_ETAT_FINAL;
                     excel[i * symbols.size() + j][3] = symbols.get(translation[0]);
                     switch (translation[2]) {
                         case move_Left:
@@ -394,6 +397,7 @@ public class Fenetre extends JFrame {
                 new ChangeTable().execute();
             }
             start.setEnabled(machine != null && machine.hasRuban());
+			stop.setEnabled(!start.isEnabled());
 
             newRuban.setEnabled(machine != null);
             readRuban.setEnabled(machine != null);

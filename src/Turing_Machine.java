@@ -27,6 +27,7 @@ public class Turing_Machine {
     private final int NOUVEAU_DEPLACEMENT = 2;
 
     private final int ETAT_FINAL = -1;
+    public static final String S_ETAT_FINAL = "Etat final";
 
 
     private Ruban ruban;
@@ -36,7 +37,6 @@ public class Turing_Machine {
 
     private int[][][] tableauAction;
     private int etat = 0;
-
     /**
      * Constructeur de la machine à partir de chaque élément
      *
