@@ -47,16 +47,16 @@ public class Fenetre extends JFrame{
 		ruban = new JTextField("");
 		ruban.setEditable(false);
 		start = new JButton(
-				new ImageIcon("../images/Play_128px.png"));
+				new ImageIcon("../images/Play_64px.png"));
 		start.setToolTipText("Play");
 		stop = new JButton(
-				new ImageIcon("../images/Pause_128px.png"));
+				new ImageIcon("../images/Pause_64px.png"));
 		stop.setToolTipText("Pause");
 		accelerate = new JButton(
-				new ImageIcon("../images/Fast_forward_128px.png"));
+				new ImageIcon("../images/Fast_forward_64px.png"));
 		accelerate.setToolTipText("Accelerate");
 		decelerate = new JButton(
-				new ImageIcon("../images/Rewind_128px.png"));
+				new ImageIcon("../images/Rewind_64px.png"));
 		decelerate.setToolTipText("Decelerate");
 		start.setEnabled(false);
 		stop.setEnabled(false);
@@ -68,7 +68,7 @@ public class Fenetre extends JFrame{
 		controlPanel.add(stop);
 		controlPanel.add(start);
 		controlPanel.add(accelerate);
-		JPanel infoPanel = new JPanel(new GridLayout(1, 2));
+		JPanel infoPanel = new JPanel(new GridLayout(2, 1));
 		infoPanel.add(speed);
 		infoPanel.add(status);
 		controlPanel.add(infoPanel);
@@ -158,8 +158,6 @@ public class Fenetre extends JFrame{
 			}
 			try {
 				new ChangeMachine().execute();
-				newMachine.setEnabled(false);
-				readMachine.setEnabled(false);
 			}
 			catch (Exception e) {
 				JOptionPane.showMessageDialog(Fenetre.this,
@@ -283,7 +281,7 @@ public class Fenetre extends JFrame{
 		});
 
 		// Parametre de Fenetre
-		this.setSize(1000, 700);
+		this.setSize(600, 700);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
@@ -364,6 +362,8 @@ public class Fenetre extends JFrame{
 		@Override
 		public Void doInBackground(){
 			try {
+				newMachine.setEnabled(false);
+				readMachine.setEnabled(false);
 				turingMachine = FenetreCreation.initialiseMachine();
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(Fenetre.this,
