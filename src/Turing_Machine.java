@@ -195,7 +195,7 @@ public class Turing_Machine {
      * @return le tableau d'action
      */
     public int[][][] getTableau() {
-        int[][][] tableau = new tableau[tableauAction.length][tableauAction[0].length][3];
+        int[][][] tableau = new int[tableauAction.length][tableauAction[0].length][3];
         for (int i = 0; i < tableauAction.length; i++) {
             for (int j = 0; j < tableauAction[i].length; j++) {
                 for (int k = 0; k < 3; k++) {
