@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FenetreCreation extends JFrame {
 
-	private JLabel labelEtat, labelSym;
+	private JLabel labelEtat, labelSym, labelConsigne;
 	private JButton ok, annuler, ajoutSym, ajoutEtat, suppSym, suppEtat;
 	private JTextField textEtat, textSym;
 
@@ -69,6 +69,8 @@ public class FenetreCreation extends JFrame {
 		//Initialisation de toutes les composantes
 		labelEtat = new JLabel("Etats :");
 		labelSym = new JLabel("Symboles :");
+		labelConsigne = new JLabel("<html>Le premier etat ajoute sera l'etat initial.<br>"
+				+ "# signifie des cases vides.</html>");
 
 		ok = new JButton("OK");
 		annuler = new JButton("Annuler");
@@ -278,7 +280,9 @@ public class FenetreCreation extends JFrame {
 		c.gridwidth = 1;
 		c.insets = new Insets(5, 10, 5, 10);
 		c.fill = GridBagConstraints.BOTH;
-
+		
+		entryPanel.add(labelConsigne, c);
+		
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridwidth = 1;
