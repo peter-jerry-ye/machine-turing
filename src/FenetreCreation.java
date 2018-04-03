@@ -113,6 +113,7 @@ public class FenetreCreation extends JFrame {
 		tabSym = new ArrayList<String>();
 		tabEtat = new ArrayList<String>();
 		
+		//rendre visible symbole speciale a l'initialisation
 		tabSym.add("#");
 		modelSym.addElement("#");
 		
@@ -198,7 +199,8 @@ public class FenetreCreation extends JFrame {
 			this.dispose();
 		});
 		
-		
+		//finaliser les parametres d'entree pour la creation
+		//verification qu'aucun champ n'est null, sinon erreur
 		ok.addActionListener(e -> {
 			try {
 				if (tabEtat.isEmpty() || tabSym.isEmpty()) {
@@ -242,7 +244,8 @@ public class FenetreCreation extends JFrame {
 				JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs de saisie!", "", JOptionPane.WARNING_MESSAGE);
 			}
 		});
-
+		
+		//changement de tableau par selection d'etat
 		etats.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent evt) {
 				if (!evt.getValueIsAdjusting()) {
@@ -257,7 +260,8 @@ public class FenetreCreation extends JFrame {
 				tab.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(selDeplace));
 			}
 		});
-
+		
+		//positionnement des composantes
 		entryPanel = new JPanel(new GridBagLayout());
 		mainPanel = new JPanel(new BorderLayout());
 		boutonVal = new JPanel(new GridLayout(1, 2, 0, 0));
