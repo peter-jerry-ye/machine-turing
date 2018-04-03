@@ -14,9 +14,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FenetreCreation extends JFrame {
 
-	private JLabel labelEtat, labelSym, labelDon;
-	private JButton ok, annuler, ajoutSym, ajoutEtat, suppSym, suppEtat, parcourir;
-	private JTextField textEtat, textSym, textPar;
+	private JLabel labelEtat, labelSym;
+	private JButton ok, annuler, ajoutSym, ajoutEtat, suppSym, suppEtat;
+	private JTextField textEtat, textSym;
 
 	private JList<String> etats, symboles;
 	private DefaultListModel<String> modelEtat, modelSym;
@@ -54,17 +54,21 @@ public class FenetreCreation extends JFrame {
 		machine = null;
 		return tmp;
 	}
-
+	/**
+	 * Constructeur de FenetreCreation  
+	 * Initialise et positionne toutes les composantes dans la fenetre 
+	 */
 	private FenetreCreation() {
 		super("Machine de Turing - Creation");
 		setSize(1000, 450);
 		setLocation(100, 100);
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+		//Pas possible de fermer par le bouton fermer de fenetre
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		
+		//Initialisation de toutes les composantes
 		labelEtat = new JLabel("Etats :");
 		labelSym = new JLabel("Symboles :");
-		labelDon = new JLabel("Donnee :");
 
 		ok = new JButton("OK");
 		annuler = new JButton("Annuler");
@@ -91,8 +95,10 @@ public class FenetreCreation extends JFrame {
 		selSym = new JComboBox<String>();
 		selEtat = new JComboBox<String>();
 		selDeplace = new JComboBox<String>();
+		//ajouter l'etat finale et symbole speciale pour simuler ruban infini
 		selEtat.addItem("eFinale");
 		selSym.addItem("#");
+		//etiquettes de deplacement
 		selDeplace.addItem("Gauche");
 		selDeplace.addItem("Droite");
 		selDeplace.addItem("Statique");
@@ -108,7 +114,9 @@ public class FenetreCreation extends JFrame {
 		tabEtat = new ArrayList<String>();
 		
 		tabSym.add("#");
-
+		modelSym.addElement("#");
+		
+		//ajout de fonctionnement des boutons
 		ajoutEtat.addActionListener(e -> {
 			String data = textEtat.getText();
 			if (!modelEtat.contains(data) && !data.isEmpty() && !data.contains(" ") && !data.equals("eFinale")) {
@@ -147,9 +155,6 @@ public class FenetreCreation extends JFrame {
 
 		ajoutSym.addActionListener(e -> {
 			String data = textSym.getText();
-			if(modelSym.isEmpty()){
-				modelSym.addElement("#");
-			}
 			if (!modelSym.contains(data) && !data.isEmpty() && !data.contains(" ") && !data.equals("#")) {
 				modelSym.addElement(data);
 				tabSym.add(data);
@@ -183,7 +188,8 @@ public class FenetreCreation extends JFrame {
 				}
 			}
 		});
-
+		
+		//seul moyen de fermer la fenetre
 		annuler.addActionListener(e -> {
 			try {
 				barrier.await();
@@ -191,7 +197,8 @@ public class FenetreCreation extends JFrame {
 			}
 			this.dispose();
 		});
-
+		
+		
 		ok.addActionListener(e -> {
 			try {
 				if (tabEtat.isEmpty() || tabSym.isEmpty()) {
@@ -267,16 +274,6 @@ public class FenetreCreation extends JFrame {
 		c.gridwidth = 1;
 		c.insets = new Insets(5, 10, 5, 10);
 		c.fill = GridBagConstraints.BOTH;
-
-		entryPanel.add(labelDon, c);
-
-		c.gridy = 1;
-		c.gridx = 0;
-		c.gridwidth = 3;
-		entryPanel.add(textPar, c);
-
-		c.gridx = 3;
-		entryPanel.add(parcourir, c);
 
 		c.gridx = 0;
 		c.gridy = 2;
