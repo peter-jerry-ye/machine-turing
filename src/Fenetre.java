@@ -378,7 +378,7 @@ public class Fenetre extends JFrame {
 		private Turing_Machine turingMachine = null;
 
 		@Override
-		public Void doInBackground() {
+		public void doInBackground() {
 			try {
 				newMachine.setEnabled(false);
 				readMachine.setEnabled(false);
