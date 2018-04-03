@@ -70,7 +70,8 @@ public class FenetreCreation extends JFrame {
 		labelEtat = new JLabel("Etats :");
 		labelSym = new JLabel("Symboles :");
 		labelConsigne = new JLabel("<html>Le premier etat ajoute sera l'etat initial.<br>"
-				+ "# signifie des cases vides.</html>");
+				+ "# signifie des cases vides.<br>"
+				+ "Pas d'espace pour des symboles et etats.</html>");
 
 		ok = new JButton("OK");
 		annuler = new JButton("Annuler");
